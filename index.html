@@ -50,11 +50,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--black);color:var(--text);
 
 /* NAV */
 #screen-app{display:none;min-height:100vh;padding-top:54px;}
-#nav{position:fixed;top:0;left:0;right:0;z-index:200;height:54px;background:rgba(8,8,8,0.97);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;}
-.nav-logo{font-family:'Bebas Neue',sans-serif;font-size:1.45rem;letter-spacing:0.1em;color:var(--white);}
+#nav{position:fixed;top:0;left:0;right:0;z-index:200;min-height:54px;background:rgba(0,0,0,0.97);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:8px 14px;flex-wrap:wrap;gap:6px;}
+.nav-logo{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:0.08em;color:var(--white);white-space:nowrap;}
 .nav-logo span{color:var(--accent);}
 .nav-right{display:flex;align-items:center;gap:16px;}
-.nav-name{font-size:0.75rem;color:var(--muted);}
+.nav-name{font-size:0.7rem;color:var(--muted);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .nav-name strong{color:var(--text);font-weight:500;}
 .btn-logout{font-size:0.62rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);background:none;border:1px solid var(--border);padding:5px 12px;cursor:pointer;transition:all 0.15s;}
 .btn-logout:hover{color:var(--text);border-color:var(--border2);}
@@ -63,7 +63,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--black);color:var(--text);
 #screen-student{padding:36px 24px 60px;max-width:860px;margin:0 auto;}
 .dash-header{margin-bottom:40px;padding-bottom:24px;border-bottom:1px solid var(--border);}
 .dash-greeting{font-size:0.62rem;letter-spacing:0.25em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
-.dash-name{font-family:'Bebas Neue',sans-serif;font-size:2.4rem;letter-spacing:0.06em;color:var(--white);line-height:1;}
+.dash-name{font-family:'Bebas Neue',sans-serif;font-size:clamp(1.6rem,6vw,2.4rem);letter-spacing:0.06em;color:var(--white);line-height:1;word-break:break-word;}
 .dash-since{font-size:0.75rem;color:var(--muted);margin-top:6px;}
 .stats-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:36px;}
 .stat-box{background:var(--panel);border:1px solid var(--border);padding:20px 22px;position:relative;overflow:hidden;}
@@ -182,12 +182,16 @@ body{font-family:'DM Sans',sans-serif;background:var(--black);color:var(--text);
 @media(max-width:640px){
   .axes-grid,.axes-edit-grid,.stats-row{grid-template-columns:1fr;}
   .admin-header{flex-direction:column;align-items:flex-start;gap:14px;}
-  #screen-student,#screen-admin{padding:20px 14px 60px;}
-  .login-card{width:100%;padding:0 16px;}
-  .login-box{padding:28px 20px 24px;}
-  .dash-name{font-size:1.8rem;}
+  #screen-student,#screen-admin{padding:16px 12px 60px;}
+  #screen-student{padding-top:70px;}
+  .login-card{width:100%;padding:0 14px;}
+  .login-box{padding:24px 16px 20px;}
   .bilan-axes,.axes-edit-grid{grid-template-columns:1fr;}
   .edit-section > div[style*="grid"]{grid-template-columns:1fr !important;}
+  .stat-val{font-size:2rem;}
+  .radar-wrap{padding:8px 4px;}
+  .nav-right{gap:8px;}
+  .btn-logout{padding:4px 8px;font-size:0.58rem;}
 }
 </style>
 </head>
@@ -261,7 +265,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--black);color:var(--text);
 
     <div class="section-title">Progression technique</div>
     <div class="radar-wrap" style="padding:16px 8px;">
-      <svg id="radarSVG" viewBox="0 0 600 600" style="width:100%;max-width:580px;display:block;margin:0 auto;" xmlns="http://www.w3.org/2000/svg"></svg>
+      <svg id="radarSVG" viewBox="-60 -40 720 680" style="width:100%;display:block;margin:0 auto;" xmlns="http://www.w3.org/2000/svg"></svg>
     </div>
     <div class="axes-grid" id="stu-axes-grid"></div>
     <div class="section-title">Bilan de la semaine</div>
@@ -560,9 +564,9 @@ function drawRadar(prog){
   const svg = document.getElementById('radarSVG');
   const vals = AXES.map(ax => prog ? (prog[ax.key]||0) : 0);
   const n = AXES.length;
-  const cx = 300, cy = 300, r = 130;
+  const cx = 300, cy = 300, r = 140;
   // Label radius - enough space for text
-  const lr = 185;
+  const lr = 210;
 
   let html = '';
 
@@ -610,13 +614,13 @@ function drawRadar(prog){
     // Multi-line: split label
     const words=ax.label.split(' ');
     if(words.length<=2){
-      html+=`<text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="${anchor}" dominant-baseline="middle" font-family="DM Sans,sans-serif" font-size="13" font-weight="600" fill="#f0ece4">${ax.label}</text>`;
+      html+=`<text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="${anchor}" dominant-baseline="middle" font-family="DM Sans,sans-serif" font-size="16" font-weight="600" fill="#f0ece4">${ax.label}</text>`;
     } else {
       // 2 lines
       const line1=words.slice(0,2).join(' ');
       const line2=words.slice(2).join(' ');
-      html+=`<text x="${lx.toFixed(1)}" y="${(ly-8).toFixed(1)}" text-anchor="${anchor}" dominant-baseline="middle" font-family="DM Sans,sans-serif" font-size="13" font-weight="600" fill="#f0ece4">${line1}</text>`;
-      html+=`<text x="${lx.toFixed(1)}" y="${(ly+8).toFixed(1)}" text-anchor="${anchor}" dominant-baseline="middle" font-family="DM Sans,sans-serif" font-size="13" font-weight="600" fill="#f0ece4">${line2}</text>`;
+      html+=`<text x="${lx.toFixed(1)}" y="${(ly-10).toFixed(1)}" text-anchor="${anchor}" dominant-baseline="middle" font-family="DM Sans,sans-serif" font-size="16" font-weight="600" fill="#f0ece4">${line1}</text>`;
+      html+=`<text x="${lx.toFixed(1)}" y="${(ly+10).toFixed(1)}" text-anchor="${anchor}" dominant-baseline="middle" font-family="DM Sans,sans-serif" font-size="16" font-weight="600" fill="#f0ece4">${line2}</text>`;
     }
   });
 
