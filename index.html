@@ -258,8 +258,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--black);color:var(--text);
     </div>
 
     <div class="section-title">Progression technique</div>
-    <div class="radar-wrap" style="padding:20px;">
-      <canvas id="radarCanvas" style="max-width:100%;display:block;margin:0 auto;"></canvas>
+    <div class="radar-wrap" style="padding:16px;">
+      <div style="position:relative;width:100%;max-width:520px;margin:0 auto;" id="radar-container">
+        <canvas id="radarCanvas" style="width:100%;display:block;"></canvas>
+        <div id="radar-labels" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;"></div>
+      </div>
     </div>
     <div class="axes-grid" id="stu-axes-grid"></div>
     <div class="section-title">Bilan de la semaine</div>
@@ -446,6 +449,7 @@ document.getElementById('btn-logout').addEventListener('click', () => {
 function showApp(){
   document.getElementById('screen-login').style.display = 'none';
   document.getElementById('screen-app').style.display = 'block';
+  window.scrollTo(0, 0);
   document.getElementById('nav-username').textContent = isAdmin ? 'Alex (Admin)' : currentUser.nom;
   isAdmin ? showAdmin() : showStudent();
 }
@@ -462,19 +466,23 @@ async function showStudent(){
   document.getElementById('stu-last-cours').textContent = cours && cours.length ? fmtDate(cours[0].date) : '—';
 
   // Assiduité calculation
-  // 2 cours/semaine x 4.33 semaines x 11 mois = ~95 cours/an
+  // Référence : 2 cours/semaine, 11 mois/an (48 semaines actives)
+  // On compte les semaines réelles écoulées depuis l'inscription en excluant 1 mois de vacances
+  const nbCours = cours ? cours.length : 0;
   const inscription = new Date(currentUser.date_inscription);
   const now2 = new Date();
-  const weeksElapsed = Math.max(1, Math.floor((now2 - inscription) / (7 * 24 * 3600 * 1000)));
-  const expectedCours = Math.round(weeksElapsed * 2 * (11/12));
-  const nbCours = cours ? cours.length : 0;
+  const msPerWeek = 7 * 24 * 3600 * 1000;
+  const totalWeeks = Math.max(1, (now2 - inscription) / msPerWeek);
+  // 11 mois actifs sur 12 = 91.7% des semaines
+  const activeWeeks = totalWeeks * (11/12);
+  const expectedCours = Math.round(activeWeeks * 2);
   const assiduPct = Math.min(100, Math.round((nbCours / Math.max(1, expectedCours)) * 100));
 
   const pctEl = document.getElementById('stu-assiduite-pct');
   const barEl = document.getElementById('stu-assiduite-bar');
   const subEl = document.getElementById('stu-assiduite-sub');
   pctEl.textContent = assiduPct + '%';
-  subEl.textContent = nbCours + ' cours sur ~' + expectedCours + ' attendus';
+  subEl.textContent = nbCours + ' séance(s) suivie(s) sur ~' + expectedCours + ' attendues';
   barEl.style.width = assiduPct + '%';
   barEl.className = 'assiduite-bar-fill ' + (assiduPct >= 75 ? 'green' : assiduPct >= 45 ? 'orange' : 'red');
   pctEl.style.color = assiduPct >= 75 ? '#4a9a5f' : assiduPct >= 45 ? '#c87820' : '#a83030';
@@ -541,12 +549,19 @@ function buildAxesGrid(prog){
 }
 
 function drawRadar(prog){
+  const container = document.getElementById('radar-container');
   const canvas = document.getElementById('radarCanvas');
-  // Responsive size - extra space for labels
-  const size = Math.min(canvas.parentElement.clientWidth - 20, 560);
+  const labelsDiv = document.getElementById('radar-labels');
+  
+  // Use 100% of container, square
+  const size = container.clientWidth || 400;
   canvas.width = size; canvas.height = size;
+  canvas.style.height = size + 'px';
+  container.style.height = size + 'px';
+
   const ctx = canvas.getContext('2d');
-  const cx = size/2, cy = size/2, r = size*0.22, n = AXES.length;
+  // Radar occupies 50% of canvas - rest is for labels
+  const cx = size/2, cy = size/2, r = size * 0.30, n = AXES.length;
   ctx.clearRect(0, 0, size, size);
 
   // rings
@@ -554,9 +569,9 @@ function drawRadar(prog){
     ctx.beginPath();
     for(let i = 0; i < n; i++){
       const angle = (i / n) * Math.PI * 2 - Math.PI / 2;
-      const x = cx + r * (ring / 5) * Math.cos(angle);
-      const y = cy + r * (ring / 5) * Math.sin(angle);
-      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+      const x = cx + r*(ring/5)*Math.cos(angle);
+      const y = cy + r*(ring/5)*Math.sin(angle);
+      i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
     }
     ctx.closePath();
     ctx.strokeStyle = 'rgba(200,169,110,0.15)';
@@ -565,59 +580,58 @@ function drawRadar(prog){
 
   // spokes
   for(let i = 0; i < n; i++){
-    const angle = (i / n) * Math.PI * 2 - Math.PI / 2;
+    const angle = (i/n)*Math.PI*2 - Math.PI/2;
     ctx.beginPath();
     ctx.moveTo(cx, cy);
-    ctx.lineTo(cx + r * Math.cos(angle), cy + r * Math.sin(angle));
-    ctx.strokeStyle = 'rgba(200,169,110,0.12)';
+    ctx.lineTo(cx + r*Math.cos(angle), cy + r*Math.sin(angle));
+    ctx.strokeStyle = 'rgba(200,169,110,0.15)';
     ctx.lineWidth = 1; ctx.stroke();
   }
 
-  // data polygon - golden fill
-  const vals = AXES.map(ax => prog ? (prog[ax.key] || 0) : 0);
+  // data polygon
+  const vals = AXES.map(ax => prog ? (prog[ax.key]||0) : 0);
   ctx.beginPath();
-  vals.forEach((v, i) => {
-    const angle = (i / n) * Math.PI * 2 - Math.PI / 2;
-    const rr = r * (v / 100);
-    const x = cx + rr * Math.cos(angle), y = cy + rr * Math.sin(angle);
-    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  vals.forEach((v,i) => {
+    const angle = (i/n)*Math.PI*2 - Math.PI/2;
+    const rr = r*(v/100);
+    i===0 ? ctx.moveTo(cx+rr*Math.cos(angle), cy+rr*Math.sin(angle))
+           : ctx.lineTo(cx+rr*Math.cos(angle), cy+rr*Math.sin(angle));
   });
   ctx.closePath();
-  const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
-  grad.addColorStop(0, 'rgba(200,169,110,0.55)');
-  grad.addColorStop(1, 'rgba(139,90,20,0.25)');
+  const grad = ctx.createRadialGradient(cx,cy,0,cx,cy,r);
+  grad.addColorStop(0,'rgba(200,169,110,0.6)');
+  grad.addColorStop(1,'rgba(139,90,20,0.2)');
   ctx.fillStyle = grad; ctx.fill();
   ctx.strokeStyle = '#c8a96e'; ctx.lineWidth = 2; ctx.stroke();
 
   // dots
-  vals.forEach((v, i) => {
-    const angle = (i / n) * Math.PI * 2 - Math.PI / 2;
-    const rr = r * (v / 100);
+  vals.forEach((v,i) => {
+    const angle = (i/n)*Math.PI*2 - Math.PI/2;
+    const rr = r*(v/100);
     ctx.beginPath();
-    ctx.arc(cx + rr * Math.cos(angle), cy + rr * Math.sin(angle), 5, 0, Math.PI * 2);
-    ctx.fillStyle = '#c8a96e';
-    ctx.strokeStyle = '#080808';
-    ctx.lineWidth = 1.5;
+    ctx.arc(cx+rr*Math.cos(angle), cy+rr*Math.sin(angle), 5, 0, Math.PI*2);
+    ctx.fillStyle='#c8a96e'; ctx.strokeStyle='#080808'; ctx.lineWidth=1.5;
     ctx.fill(); ctx.stroke();
   });
 
-  // labels - bigger, white, readable
-  const labelR = r + size * 0.22;
-  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  ctx.fillStyle = '#f0ece4';
-  const fontSize = Math.max(12, size * 0.026);
-  ctx.font = `600 ${fontSize}px DM Sans`;
+  // HTML labels - positioned absolutely, never cut off
+  labelsDiv.innerHTML = '';
+  const labelR = r + size * 0.16;
   AXES.forEach((ax, i) => {
-    const angle = (i / n) * Math.PI * 2 - Math.PI / 2;
-    const lx = cx + labelR * Math.cos(angle);
-    const ly = cy + labelR * Math.sin(angle);
-    const words = ax.label.split(' ');
-    if(words.length <= 2){
-      ctx.fillText(ax.label, lx, ly);
-    } else {
-      ctx.fillText(words.slice(0, 2).join(' '), lx, ly - fontSize * 0.7);
-      ctx.fillText(words.slice(2).join(' '), lx, ly + fontSize * 0.7);
-    }
+    const angle = (i/n)*Math.PI*2 - Math.PI/2;
+    const lx = cx + labelR*Math.cos(angle);
+    const ly = cy + labelR*Math.sin(angle);
+    const pct = { left: (lx/size*100).toFixed(1)+'%', top: (ly/size*100).toFixed(1)+'%' };
+    
+    // Determine text-align based on position
+    const cosA = Math.cos(angle);
+    const align = cosA > 0.2 ? 'left' : cosA < -0.2 ? 'right' : 'center';
+    const transform = align==='left' ? 'translateY(-50%)' : align==='right' ? 'translate(-100%,-50%)' : 'translate(-50%,-50%)';
+    
+    const el = document.createElement('div');
+    el.style.cssText = `position:absolute;left:${pct.left};top:${pct.top};transform:${transform};font-family:'DM Sans',sans-serif;font-size:clamp(10px,2.5vw,13px);font-weight:600;color:#f0ece4;white-space:nowrap;line-height:1.3;text-align:${align};`;
+    el.textContent = ax.label;
+    labelsDiv.appendChild(el);
   });
 }
 
