@@ -285,10 +285,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--black);color:var(--text);
     <div class="admin-header">
       <div class="admin-title">ESPACE <span>ADMIN</span></div>
       <div style="display:flex;gap:10px;flex-wrap:wrap;">
-        <label class="btn-add" style="cursor:pointer;" id="label-import-csv">
-          ↑ Importer CSV Calendly
-          <input type="file" id="input-csv" accept=".csv" style="display:none;">
-        </label>
+        <button class="btn-add" id="btn-import-csv-trigger">↑ Importer CSV Calendly</button>
+        <input type="file" id="input-csv" accept=".csv" style="display:none;">
         <button class="btn-add" id="btn-new-eleve">+ Nouvel élève</button>
       </div>
     </div>
@@ -804,6 +802,7 @@ async function deleteEleve(id){
 
 
 // CSV IMPORT
+document.getElementById('btn-import-csv-trigger').addEventListener('click', () => document.getElementById('input-csv').click());
 document.getElementById('input-csv').addEventListener('change', async (e) => {
   const file = e.target.files[0];
   if(!file) return;
