@@ -8,8 +8,8 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root {
-  --black: #080808;
-  --dark: #0f0f0f;
+  --black: #000000;
+  --dark: #080808;
   --panel: #151515;
   --panel2: #1a1a1a;
   --border: #2e2e2e;
@@ -31,8 +31,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--black);color:var(--text);
 /* LOGIN */
 #screen-login{
   min-height:100vh;display:flex;align-items:center;justify-content:center;
-  background:var(--black);
-  background-image:radial-gradient(ellipse 60% 50% at 50% 48%,rgba(139,26,26,0.08) 0%,transparent 68%);
+  background:#000000;
 }
 .login-card{width:360px;}
 .login-brand{margin-bottom:36px;}
@@ -258,11 +257,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--black);color:var(--text);
     </div>
 
     <div class="section-title">Progression technique</div>
-    <div class="radar-wrap" style="padding:16px;">
-      <div style="position:relative;width:100%;max-width:520px;margin:0 auto;" id="radar-container">
-        <canvas id="radarCanvas" style="width:100%;display:block;"></canvas>
-        <div id="radar-labels" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;"></div>
-      </div>
+    <div class="radar-wrap" style="padding:16px 8px;">
+      <svg id="radarSVG" viewBox="0 0 500 500" style="width:100%;max-width:540px;display:block;margin:0 auto;" xmlns="http://www.w3.org/2000/svg"></svg>
     </div>
     <div class="axes-grid" id="stu-axes-grid"></div>
     <div class="section-title">Bilan de la semaine</div>
@@ -549,90 +545,70 @@ function buildAxesGrid(prog){
 }
 
 function drawRadar(prog){
-  const container = document.getElementById('radar-container');
-  const canvas = document.getElementById('radarCanvas');
-  const labelsDiv = document.getElementById('radar-labels');
-  
-  // Use 100% of container, square
-  const size = container.clientWidth || 400;
-  canvas.width = size; canvas.height = size;
-  canvas.style.height = size + 'px';
-  container.style.height = size + 'px';
-
-  const ctx = canvas.getContext('2d');
-  // Radar occupies 50% of canvas - rest is for labels
-  const cx = size/2, cy = size/2, r = size * 0.30, n = AXES.length;
-  ctx.clearRect(0, 0, size, size);
-
-  // rings
-  for(let ring = 1; ring <= 5; ring++){
-    ctx.beginPath();
-    for(let i = 0; i < n; i++){
-      const angle = (i / n) * Math.PI * 2 - Math.PI / 2;
-      const x = cx + r*(ring/5)*Math.cos(angle);
-      const y = cy + r*(ring/5)*Math.sin(angle);
-      i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
-    }
-    ctx.closePath();
-    ctx.strokeStyle = 'rgba(200,169,110,0.15)';
-    ctx.lineWidth = 1; ctx.stroke();
-  }
-
-  // spokes
-  for(let i = 0; i < n; i++){
-    const angle = (i/n)*Math.PI*2 - Math.PI/2;
-    ctx.beginPath();
-    ctx.moveTo(cx, cy);
-    ctx.lineTo(cx + r*Math.cos(angle), cy + r*Math.sin(angle));
-    ctx.strokeStyle = 'rgba(200,169,110,0.15)';
-    ctx.lineWidth = 1; ctx.stroke();
-  }
-
-  // data polygon
+  const svg = document.getElementById('radarSVG');
   const vals = AXES.map(ax => prog ? (prog[ax.key]||0) : 0);
-  ctx.beginPath();
-  vals.forEach((v,i) => {
-    const angle = (i/n)*Math.PI*2 - Math.PI/2;
-    const rr = r*(v/100);
-    i===0 ? ctx.moveTo(cx+rr*Math.cos(angle), cy+rr*Math.sin(angle))
-           : ctx.lineTo(cx+rr*Math.cos(angle), cy+rr*Math.sin(angle));
-  });
-  ctx.closePath();
-  const grad = ctx.createRadialGradient(cx,cy,0,cx,cy,r);
-  grad.addColorStop(0,'rgba(200,169,110,0.6)');
-  grad.addColorStop(1,'rgba(139,90,20,0.2)');
-  ctx.fillStyle = grad; ctx.fill();
-  ctx.strokeStyle = '#c8a96e'; ctx.lineWidth = 2; ctx.stroke();
+  const n = AXES.length;
+  const cx = 250, cy = 250, r = 155;
+  // Label radius - enough space for text
+  const lr = 230;
 
-  // dots
-  vals.forEach((v,i) => {
-    const angle = (i/n)*Math.PI*2 - Math.PI/2;
-    const rr = r*(v/100);
-    ctx.beginPath();
-    ctx.arc(cx+rr*Math.cos(angle), cy+rr*Math.sin(angle), 5, 0, Math.PI*2);
-    ctx.fillStyle='#c8a96e'; ctx.strokeStyle='#080808'; ctx.lineWidth=1.5;
-    ctx.fill(); ctx.stroke();
+  let html = '';
+
+  // Rings
+  for(let ring=1;ring<=5;ring++){
+    let pts = [];
+    for(let i=0;i<n;i++){
+      const a=(i/n)*Math.PI*2-Math.PI/2;
+      pts.push((cx+r*(ring/5)*Math.cos(a)).toFixed(1)+','+(cy+r*(ring/5)*Math.sin(a)).toFixed(1));
+    }
+    html += `<polygon points="${pts.join(' ')}" fill="none" stroke="rgba(200,169,110,0.18)" stroke-width="1"/>`;
+  }
+
+  // Spokes
+  for(let i=0;i<n;i++){
+    const a=(i/n)*Math.PI*2-Math.PI/2;
+    html += `<line x1="${cx}" y1="${cy}" x2="${(cx+r*Math.cos(a)).toFixed(1)}" y2="${(cy+r*Math.sin(a)).toFixed(1)}" stroke="rgba(200,169,110,0.15)" stroke-width="1"/>`;
+  }
+
+  // Data polygon
+  let pts = [];
+  vals.forEach((v,i)=>{
+    const a=(i/n)*Math.PI*2-Math.PI/2;
+    const rr=r*(v/100);
+    pts.push((cx+rr*Math.cos(a)).toFixed(1)+','+(cy+rr*Math.sin(a)).toFixed(1));
+  });
+  html += `<defs><radialGradient id="rg" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="rgba(200,169,110,0.65)"/><stop offset="100%" stop-color="rgba(120,80,10,0.2)"/></radialGradient></defs>`;
+  html += `<polygon points="${pts.join(' ')}" fill="url(#rg)" stroke="#c8a96e" stroke-width="2"/>`;
+
+  // Dots
+  vals.forEach((v,i)=>{
+    const a=(i/n)*Math.PI*2-Math.PI/2;
+    const rr=r*(v/100);
+    html += `<circle cx="${(cx+rr*Math.cos(a)).toFixed(1)}" cy="${(cy+rr*Math.sin(a)).toFixed(1)}" r="5" fill="#c8a96e" stroke="#000" stroke-width="1.5"/>`;
   });
 
-  // HTML labels - positioned absolutely, never cut off
-  labelsDiv.innerHTML = '';
-  const labelR = r + size * 0.16;
-  AXES.forEach((ax, i) => {
-    const angle = (i/n)*Math.PI*2 - Math.PI/2;
-    const lx = cx + labelR*Math.cos(angle);
-    const ly = cy + labelR*Math.sin(angle);
-    const pct = { left: (lx/size*100).toFixed(1)+'%', top: (ly/size*100).toFixed(1)+'%' };
-    
-    // Determine text-align based on position
-    const cosA = Math.cos(angle);
-    const align = cosA > 0.2 ? 'left' : cosA < -0.2 ? 'right' : 'center';
-    const transform = align==='left' ? 'translateY(-50%)' : align==='right' ? 'translate(-100%,-50%)' : 'translate(-50%,-50%)';
-    
-    const el = document.createElement('div');
-    el.style.cssText = `position:absolute;left:${pct.left};top:${pct.top};transform:${transform};font-family:'DM Sans',sans-serif;font-size:clamp(10px,2.5vw,13px);font-weight:600;color:#f0ece4;white-space:nowrap;line-height:1.3;text-align:${align};`;
-    el.textContent = ax.label;
-    labelsDiv.appendChild(el);
+  // Labels — SVG foreignObject for wrapping text
+  AXES.forEach((ax,i)=>{
+    const a=(i/n)*Math.PI*2-Math.PI/2;
+    const lx=cx+lr*Math.cos(a);
+    const ly=cy+lr*Math.sin(a);
+    const cosA=Math.cos(a);
+    // Anchor
+    const anchor = cosA>0.15?'start':cosA<-0.15?'end':'middle';
+    // Multi-line: split label
+    const words=ax.label.split(' ');
+    if(words.length<=2){
+      html+=`<text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="${anchor}" dominant-baseline="middle" font-family="DM Sans,sans-serif" font-size="13" font-weight="600" fill="#f0ece4">${ax.label}</text>`;
+    } else {
+      // 2 lines
+      const line1=words.slice(0,2).join(' ');
+      const line2=words.slice(2).join(' ');
+      html+=`<text x="${lx.toFixed(1)}" y="${(ly-8).toFixed(1)}" text-anchor="${anchor}" dominant-baseline="middle" font-family="DM Sans,sans-serif" font-size="13" font-weight="600" fill="#f0ece4">${line1}</text>`;
+      html+=`<text x="${lx.toFixed(1)}" y="${(ly+8).toFixed(1)}" text-anchor="${anchor}" dominant-baseline="middle" font-family="DM Sans,sans-serif" font-size="13" font-weight="600" fill="#f0ece4">${line2}</text>`;
+    }
   });
+
+  svg.innerHTML = html;
 }
 
 // ADMIN
