@@ -464,7 +464,7 @@ async function doLogin(){
     showApp(); return;
   }
 
-  const { data, error } = await db.from('eleves').select('*').eq('identifiant', id).eq('mot_de_passe', pw).single();
+  const { data, error } = await db.from('eleves').select('id,nom,identifiant,mot_de_passe,email,date_inscription,commentaire,titre,date_niveau,note_privee,referent_groupe').eq('identifiant', id).eq('mot_de_passe', pw).single();
   loading.classList.add('hidden');
   document.getElementById('btn-login').disabled = false;
   if(error || !data){ err.textContent = 'Identifiant ou mot de passe incorrect.'; return; }
