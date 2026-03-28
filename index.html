@@ -862,7 +862,11 @@ async function deleteEleve(id){
 
 
 // CSV IMPORT
-document.getElementById('btn-import-csv-trigger').addEventListener('click', () => document.getElementById('input-csv').click());
+document.getElementById('btn-import-csv-trigger').addEventListener('click', () => {
+  document.getElementById('input-csv').value = '';
+  document.getElementById('input-csv').click();
+});
+
 document.getElementById('input-csv').addEventListener('change', async (e) => {
   const file = e.target.files[0];
   if(!file) return;
@@ -871,52 +875,73 @@ document.getElementById('input-csv').addEventListener('change', async (e) => {
   result.textContent = 'Lecture du fichier en cours…';
 
   try {
-    let text;
-  try { text = await file.text(); }
-  catch(e1) {
-    try {
-      text = await new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = e => resolve(e.target.result);
-        reader.onerror = reject;
-        reader.readAsText(file);
-      });
-    } catch(e2) { throw new Error('Lecture impossible : ' + e2.message); }
-  }
-    const allLines = text.split('\n');
-    const headers = allLines[0].split(',').map(h => h.trim().replace(/^"|"$/g,''));
+    // Robust file reading
+    const text = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = e => resolve(e.target.result);
+      reader.onerror = () => reject(new Error('Fichier illisible'));
+      reader.readAsText(file, 'UTF-8');
+    });
 
-    const emailIdx = headers.findIndex(h => /invitee email/i.test(h));
-    const dateIdx  = headers.findIndex(h => /start date/i.test(h));
-    const cancelIdx= headers.findIndex(h => /^canceled$/i.test(h));
-    const typeIdx  = headers.findIndex(h => /event type name/i.test(h));
+    if(!text || text.length < 10) throw new Error('Fichier vide ou illisible');
 
-    if(emailIdx===-1||dateIdx===-1){ result.textContent='❌ Format CSV non reconnu.'; return; }
+    // Robust CSV parser - handles quoted fields with commas inside
+    function parseCSV(str) {
+      const rows = [];
+      const lines = str.replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n');
+      for(const line of lines) {
+        if(!line.trim()) continue;
+        const row = [];
+        let inQuotes = false, cur = '';
+        for(let i=0;i<line.length;i++){
+          const ch = line[i];
+          if(ch==='"'){ inQuotes=!inQuotes; }
+          else if(ch===','&&!inQuotes){ row.push(cur.trim()); cur=''; }
+          else { cur+=ch; }
+        }
+        row.push(cur.trim());
+        rows.push(row);
+      }
+      return rows;
+    }
+
+    const rows = parseCSV(text);
+    if(rows.length < 2) throw new Error('CSV trop court');
+
+    const headers = rows[0].map(h => h.replace(/^"|"$/g,'').toLowerCase().trim());
+    const emailIdx  = headers.findIndex(h => h.includes('invitee email'));
+    const dateIdx   = headers.findIndex(h => h.includes('start date'));
+    const cancelIdx = headers.findIndex(h => h === 'canceled');
+
+    if(emailIdx===-1||dateIdx===-1) throw new Error('Format CSV non reconnu — vérifiez que c'est un export Calendly');
+
+    result.textContent = `Analyse de ${rows.length-1} lignes…`;
 
     // Load all eleves with email
     const { data: eleves } = await db.from('eleves').select('id,email,nom');
     const eleveMap = {};
     (eleves||[]).forEach(el => { if(el.email) eleveMap[el.email.toLowerCase().trim()] = el; });
 
-    // Parse rows and group by eleve
+    // Group dates by eleve
     const byEleve = {};
-    for(let i=1;i<allLines.length;i++){
-      const row = allLines[i].split(',').map(c=>c.trim().replace(/^['"]|['"]$/g,''));
-      if(row.length<3) continue;
-      const email   = (row[emailIdx]||'').toLowerCase().trim();
-      const dateRaw = (row[dateIdx]||'').trim();
-      const canceled= (row[cancelIdx]||'').toLowerCase();
-      if(!email||!dateRaw||canceled==='true') continue;
-      const date = dateRaw.split(' ')[0];
-      if(!/\d{4}-\d{2}-\d{2}/.test(date)) continue;
-      if(new Date(date) >= new Date()) continue; // skip future
+    let skipped = 0;
+    for(let i=1;i<rows.length;i++){
+      const row = rows[i];
+      if(row.length < Math.max(emailIdx,dateIdx)+1) continue;
+      const email   = (row[emailIdx]||'').replace(/^['"]|['"]$/g,'').toLowerCase().trim();
+      const dateRaw = (row[dateIdx]||'').replace(/^['"]|['"]$/g,'').trim();
+      const canceled = cancelIdx>=0 ? (row[cancelIdx]||'').toLowerCase().trim() : 'false';
+      if(!email||!dateRaw||canceled==='true') { skipped++; continue; }
+      const date = dateRaw.split(' ')[0].split('T')[0];
+      if(date.length !== 10 || date[4] !== '-' || date[7] !== '-') continue;
+      if(new Date(date) >= new Date()) continue;
       const eleve = eleveMap[email];
       if(!eleve) continue;
       if(!byEleve[eleve.id]) byEleve[eleve.id] = {nom:eleve.nom, dates:new Set()};
       byEleve[eleve.id].dates.add(date);
     }
 
-    // For each eleve, load existing cours and insert missing ones
+    // Insert missing cours per eleve
     let totalAdded = 0;
     const summary = [];
     for(const [eleveId, info] of Object.entries(byEleve)){
@@ -924,17 +949,20 @@ document.getElementById('input-csv').addEventListener('change', async (e) => {
       const existingDates = new Set((existing||[]).map(c=>c.date));
       const toInsert = [...info.dates].filter(d=>!existingDates.has(d));
       if(toInsert.length>0){
-        await db.from('cours').insert(toInsert.map(date=>({eleve_id:eleveId, date, commentaire:'Import Calendly'})));
+        // Insert in batches of 50
+        for(let b=0;b<toInsert.length;b+=50){
+          await db.from('cours').insert(toInsert.slice(b,b+50).map(date=>({eleve_id:eleveId,date,commentaire:'Import Calendly'})));
+        }
         totalAdded += toInsert.length;
       }
-      summary.push(`${info.nom} : +${toInsert.length} séance(s) (${info.dates.size} dans le CSV)`);
+      summary.push(`${info.nom} : +${toInsert.length} ajoutée(s) / ${info.dates.size} dans le CSV`);
     }
 
     result.innerHTML = `<strong>✓ Import terminé — ${totalAdded} séance(s) ajoutée(s)</strong><br><br>` + summary.join('<br>');
-    toast(`Import CSV terminé — ${totalAdded} séances ajoutées.`);
+    toast(`Import CSV — ${totalAdded} séances ajoutées.`);
     await loadEleves();
   } catch(err) {
-    result.textContent = '❌ Erreur : ' + err.message;
+    result.innerHTML = '❌ Erreur : ' + err.message;
   }
 });
 
