@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Self-Shao — Espace Élève</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root {
+  --black: #080808;
+  --dark: #0f0f0f;
+  --panel: #151515;
+  --panel2: #1a1a1a;
+  --border: #2e2e2e;
+  --border2: #3a3a3a;
+  --accent: #c8a96e;
+  --accent-dim: rgba(200,169,110,0.12);
+  --red: #8b1a1a;
+  --red2: #a82020;
+  --white: #f0ece4;
+  --muted: #888;
+  --text: #d4d0c8;
+  --text2: #aaa;
+  --success: #3a6b4a;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'DM Sans',sans-serif;background:var(--black);color:var(--text);min-height:100vh;overflow-x:hidden;}
+.hidden{display:none!important;}
+
+/* LOGIN */
+#screen-login{
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  background:var(--black);
+  background-image:radial-gradient(ellipse 60% 50% at 50% 48%,rgba(139,26,26,0.08) 0%,transparent 68%);
+}
+.login-card{width:360px;}
+.login-brand{margin-bottom:36px;}
+.login-logo{font-family:'Bebas Neue',sans-serif;font-size:2.8rem;letter-spacing:0.08em;color:var(--white);line-height:1;}
+.login-logo span{color:var(--accent);}
+.login-sub{font-size:0.62rem;letter-spacing:0.28em;text-transform:uppercase;color:var(--muted);margin-top:5px;}
+.login-box{background:var(--panel);border:1px solid var(--border);padding:36px 32px 30px;position:relative;overflow:hidden;}
+.login-box::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--red),var(--accent));}
+.f-label{font-size:0.62rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--accent);display:block;margin-bottom:7px;}
+.f-input{width:100%;background:var(--dark);border:1px solid var(--border);color:var(--white);font-family:'DM Sans',sans-serif;font-size:0.9rem;padding:11px 13px;outline:none;transition:border-color 0.2s;margin-bottom:18px;}
+.f-input:focus{border-color:var(--accent);}
+.btn-login{width:100%;background:var(--red);color:var(--white);font-family:'Bebas Neue',sans-serif;font-size:1.05rem;letter-spacing:0.18em;padding:13px;border:none;cursor:pointer;transition:background 0.18s;margin-top:4px;}
+.btn-login:hover{background:var(--red2);}
+.login-err{color:#c05050;font-size:0.77rem;margin-top:10px;min-height:16px;text-align:center;}
+.login-loading{color:var(--muted);font-size:0.77rem;margin-top:10px;text-align:center;min-height:16px;}
+
+/* NAV */
+#screen-app{display:none;min-height:100vh;padding-top:54px;}
+#nav{position:fixed;top:0;left:0;right:0;z-index:200;height:54px;background:rgba(8,8,8,0.97);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;}
+.nav-logo{font-family:'Bebas Neue',sans-serif;font-size:1.45rem;letter-spacing:0.1em;color:var(--white);}
+.nav-logo span{color:var(--accent);}
+.nav-right{display:flex;align-items:center;gap:16px;}
+.nav-name{font-size:0.75rem;color:var(--muted);}
+.nav-name strong{color:var(--text);font-weight:500;}
+.btn-logout{font-size:0.62rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);background:none;border:1px solid var(--border);padding:5px 12px;cursor:pointer;transition:all 0.15s;}
+.btn-logout:hover{color:var(--text);border-color:var(--border2);}
+
+/* STUDENT */
+#screen-student{padding:36px 24px 60px;max-width:860px;margin:0 auto;}
+.dash-header{margin-bottom:40px;padding-bottom:24px;border-bottom:1px solid var(--border);}
+.dash-greeting{font-size:0.62rem;letter-spacing:0.25em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+.dash-name{font-family:'Bebas Neue',sans-serif;font-size:2.4rem;letter-spacing:0.06em;color:var(--white);line-height:1;}
+.dash-since{font-size:0.75rem;color:var(--muted);margin-top:6px;}
+.stats-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:36px;}
+.stat-box{background:var(--panel);border:1px solid var(--border);padding:20px 22px;position:relative;overflow:hidden;}
+.stat-box::after{content:'';position:absolute;top:0;left:0;bottom:0;width:2px;background:var(--accent);}
+.stat-val{font-family:'Bebas Neue',sans-serif;font-size:2.6rem;color:var(--white);line-height:1;}
+.stat-label{font-size:0.62rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--accent);margin-top:4px;}
+.section-title{font-size:0.62rem;letter-spacing:0.25em;text-transform:uppercase;color:var(--accent);margin-bottom:20px;display:flex;align-items:center;gap:12px;}
+.section-title::after{content:'';flex:1;height:1px;background:var(--border);}
+.radar-wrap{background:var(--panel);border:1px solid var(--border);padding:28px;margin-bottom:28px;display:flex;justify-content:center;}
+#radarCanvas{max-width:100%;}
+.axes-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:36px;}
+.axis-card{background:var(--panel);border:1px solid var(--border);padding:16px 18px;}
+.axis-name{font-size:0.76rem;font-weight:600;color:var(--white);margin-bottom:6px;letter-spacing:0.04em;}
+.axis-score-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.axis-score{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:var(--accent);line-height:1;}
+.axis-bar-bg{flex:1;height:3px;background:var(--border2);}
+.axis-bar-fill{height:100%;background:linear-gradient(90deg,var(--red),var(--accent));transition:width 0.6s ease;}
+.axis-subs{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px;}
+.axis-sub{font-size:0.6rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--text2);background:var(--dark);border:1px solid var(--border);padding:3px 7px;}
+.comment-box{background:var(--panel);border:1px solid var(--border);border-left:2px solid var(--accent);padding:20px 22px;margin-bottom:36px;}
+.comment-from{font-size:0.62rem;letter-spacing:0.22em;text-transform:uppercase;color:var(--accent);margin-bottom:10px;font-weight:600;}
+.comment-text{font-size:0.88rem;color:var(--text);line-height:1.65;font-style:italic;}
+.comment-empty{font-style:normal;color:var(--muted);}
+.history-list{display:flex;flex-direction:column;gap:8px;}
+.history-item{background:var(--panel);border:1px solid var(--border);padding:12px 18px;display:flex;align-items:center;gap:16px;}
+.history-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);flex-shrink:0;}
+.history-date{font-size:0.8rem;color:var(--white);font-weight:500;min-width:120px;}
+.history-note{font-size:0.78rem;color:var(--muted);}
+.history-empty{font-size:0.82rem;color:var(--muted);padding:16px 0;}
+
+/* ADMIN */
+#screen-admin{padding:36px 24px 60px;max-width:960px;margin:0 auto;}
+.admin-header{margin-bottom:36px;padding-bottom:20px;border-bottom:1px solid var(--border);display:flex;align-items:flex-end;justify-content:space-between;}
+.admin-title{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:0.08em;color:var(--white);}
+.admin-title span{color:var(--accent);}
+.btn-add{background:var(--red);color:var(--white);font-family:'Bebas Neue',sans-serif;font-size:0.9rem;letter-spacing:0.15em;padding:10px 20px;border:none;cursor:pointer;transition:background 0.18s;}
+.btn-add:hover{background:var(--red2);}
+.eleve-list{display:flex;flex-direction:column;gap:2px;margin-bottom:32px;}
+.eleve-row{background:var(--panel);border:1px solid var(--border);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;transition:border-color 0.15s,background 0.15s;}
+.eleve-row.selected{border-color:var(--accent);background:var(--accent-dim);}
+.eleve-nom{font-size:0.9rem;color:var(--white);font-weight:500;}
+.eleve-id{font-size:0.7rem;color:var(--muted);}
+.eleve-cours-count{font-size:0.75rem;color:var(--text2);}
+.btn-sm{font-size:0.62rem;letter-spacing:0.15em;text-transform:uppercase;padding:5px 12px;border:1px solid var(--border);background:none;color:var(--muted);cursor:pointer;transition:all 0.15s;}
+.btn-sm:hover{color:var(--text);border-color:var(--border2);}
+.btn-sm.danger:hover{color:#d05050;border-color:#d05050;}
+.btn-sm.primary{border-color:var(--accent);color:var(--accent);}
+
+#admin-edit{background:var(--panel);border:1px solid var(--border);padding:28px 28px 24px;margin-bottom:32px;position:relative;}
+#admin-edit::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--red),var(--accent));}
+.edit-title{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:0.08em;color:var(--white);margin-bottom:22px;}
+.edit-section{margin-bottom:24px;}
+.edit-section-label{font-size:0.62rem;letter-spacing:0.22em;text-transform:uppercase;color:var(--accent);margin-bottom:14px;display:block;}
+.axes-edit-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.axis-edit-item{display:flex;flex-direction:column;gap:6px;}
+.axis-edit-name{font-size:0.72rem;color:var(--text);font-weight:500;}
+.axis-edit-row{display:flex;align-items:center;gap:10px;}
+.axis-slider{flex:1;-webkit-appearance:none;appearance:none;height:3px;background:var(--border2);outline:none;cursor:pointer;}
+.axis-slider::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--accent);cursor:pointer;}
+.axis-slider::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:var(--accent);cursor:pointer;border:none;}
+.axis-val{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:var(--accent);min-width:32px;text-align:right;}
+.edit-textarea{width:100%;background:var(--dark);border:1px solid var(--border);color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.85rem;padding:12px 14px;outline:none;resize:vertical;min-height:80px;transition:border-color 0.2s;}
+.edit-textarea:focus{border-color:var(--accent);}
+.edit-date{background:var(--dark);border:1px solid var(--border);color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.85rem;padding:10px 13px;outline:none;transition:border-color 0.2s;}
+.edit-date:focus{border-color:var(--accent);}
+.edit-actions{display:flex;gap:10px;margin-top:20px;align-items:center;}
+.btn-save{background:var(--success);color:var(--white);font-family:'Bebas Neue',sans-serif;font-size:0.9rem;letter-spacing:0.15em;padding:10px 24px;border:none;cursor:pointer;transition:background 0.18s;}
+.btn-save:hover{background:#4a7c5a;}
+.btn-cancel{background:none;border:1px solid var(--border);color:var(--muted);font-family:'DM Sans',sans-serif;font-size:0.82rem;padding:10px 18px;cursor:pointer;transition:all 0.15s;}
+.btn-cancel:hover{color:var(--text);}
+.save-msg{font-size:0.78rem;color:#5a9a6a;}
+
+/* MODAL */
+#modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:500;display:flex;align-items:center;justify-content:center;}
+.modal-box{background:var(--panel);border:1px solid var(--border);padding:36px 32px;width:380px;position:relative;}
+.modal-box::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--red),var(--accent));}
+.modal-title{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:0.08em;color:var(--white);margin-bottom:24px;}
+.modal-err{color:#c05050;font-size:0.77rem;margin-top:8px;min-height:16px;}
+.modal-actions{display:flex;gap:10px;margin-top:20px;}
+
+/* TOAST */
+#toast{position:fixed;bottom:24px;right:24px;z-index:999;background:var(--panel2);border:1px solid var(--border2);padding:12px 20px;font-size:0.8rem;color:var(--text);transform:translateY(80px);opacity:0;transition:all 0.3s;pointer-events:none;}
+#toast.show{transform:translateY(0);opacity:1;}
+#toast.ok{border-left:3px solid #5a9a6a;}
+#toast.err{border-left:3px solid #c05050;}
+
+/* ASSIDUITÉ */
+.assiduite-wrap{background:var(--panel);border:1px solid var(--border);padding:20px 22px;margin-bottom:36px;position:relative;overflow:hidden;}
+.assiduite-wrap::after{content:'';position:absolute;top:0;left:0;bottom:0;width:2px;background:var(--accent);}
+.assiduite-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.assiduite-label{font-size:0.62rem;letter-spacing:0.22em;text-transform:uppercase;color:var(--accent);}
+.assiduite-pct{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;line-height:1;}
+.assiduite-sub{font-size:0.72rem;color:var(--text2);margin-top:2px;}
+.assiduite-bar-bg{width:100%;height:8px;background:var(--border2);border-radius:0;}
+.assiduite-bar-fill{height:100%;transition:width 0.8s ease;border-radius:0;}
+.assiduite-bar-fill.green{background:linear-gradient(90deg,#2d6a3f,#4a9a5f);}
+.assiduite-bar-fill.orange{background:linear-gradient(90deg,#8b4a00,#c87820);}
+.assiduite-bar-fill.red{background:linear-gradient(90deg,#6a1a1a,#a83030);}
+
+/* ÉTOILES */
+.stars-wrap{display:flex;gap:4px;align-items:center;}
+.star{font-size:1.1rem;cursor:default;color:var(--border2);transition:color 0.15s;}
+.star.filled{color:var(--accent);}
+.star.clickable{cursor:pointer;}
+.star.clickable:hover{color:var(--accent);}
+
+/* BILAN HEBDO */
+.bilan-wrap{background:var(--panel);border:1px solid var(--border);border-left:2px solid var(--accent);padding:20px 22px;margin-bottom:36px;}
+.bilan-date{font-size:0.62rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--accent);margin-bottom:14px;}
+.bilan-axes{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
+.bilan-axis-item{display:flex;flex-direction:column;gap:4px;}
+.bilan-axis-name{font-size:0.7rem;color:var(--text);font-weight:500;}
+.bilan-commentaire{font-size:0.85rem;color:var(--text);line-height:1.65;font-style:italic;padding-top:12px;border-top:1px solid var(--border);}
+.edit-section-label{font-size:0.62rem;letter-spacing:0.22em;text-transform:uppercase;color:var(--accent);margin-bottom:14px;display:block;}
+
+@media(max-width:600px){
+  .axes-grid,.axes-edit-grid,.stats-row{grid-template-columns:1fr;}
+  .admin-header{flex-direction:column;align-items:flex-start;gap:14px;}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="screen-login">
+  <div class="login-card">
+    <div class="login-brand">
+      <div class="login-logo">SELF<span>-</span>SHAO</div>
+      <div class="login-sub">Espace personnel</div>
+    </div>
+    <div class="login-box">
+      <label class="f-label" for="inp-id">Identifiant</label>
+      <input class="f-input" type="text" id="inp-id" autocomplete="username">
+      <label class="f-label" for="inp-pw">Mot de passe</label>
+      <input class="f-input" type="password" id="inp-pw" autocomplete="current-password">
+      <button class="btn-login" id="btn-login">Accéder</button>
+      <div class="login-err" id="login-err"></div>
+      <div class="login-loading hidden" id="login-loading">Connexion en cours…</div>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="screen-app">
+  <nav id="nav">
+    <div class="nav-logo">SELF<span>-</span>SHAO</div>
+    <div class="nav-right">
+      <div class="nav-name">Espace de <strong id="nav-username"></strong></div>
+      <button class="btn-logout" id="btn-logout">Déconnexion</button>
+    </div>
+  </nav>
+
+  <!-- STUDENT DASHBOARD -->
+  <div id="screen-student" class="hidden">
+    <div class="dash-header">
+      <div class="dash-greeting">Tableau de bord</div>
+      <div class="dash-name" id="stu-name"></div>
+      <div class="dash-since" id="stu-since"></div>
+    </div>
+    <div class="stats-row">
+      <div class="stat-box">
+        <div class="stat-val" id="stu-cours-count">0</div>
+        <div class="stat-label">Cours suivis</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val" id="stu-last-cours">—</div>
+        <div class="stat-label">Dernière séance</div>
+      </div>
+    </div>
+    <div class="section-title">Assiduité</div>
+    <div class="assiduite-wrap">
+      <div class="assiduite-header">
+        <div>
+          <div class="assiduite-label">Présence aux cours</div>
+          <div class="assiduite-sub" id="stu-assiduite-sub"></div>
+        </div>
+        <div style="text-align:right;">
+          <div class="assiduite-pct" id="stu-assiduite-pct">—</div>
+          <div class="assiduite-sub">d'assiduité</div>
+        </div>
+      </div>
+      <div class="assiduite-bar-bg">
+        <div class="assiduite-bar-fill" id="stu-assiduite-bar" style="width:0%"></div>
+      </div>
+    </div>
+
+    <div class="section-title">Progression technique</div>
+    <div class="radar-wrap">
+      <canvas id="radarCanvas" width="500" height="500"></canvas>
+    </div>
+    <div class="axes-grid" id="stu-axes-grid"></div>
+    <div class="section-title">Bilan de la semaine</div>
+    <div class="bilan-wrap" id="stu-bilan-wrap">
+      <div class="bilan-date" id="stu-bilan-date">Aucun bilan disponible</div>
+      <div class="bilan-axes" id="stu-bilan-axes"></div>
+      <div class="bilan-commentaire" id="stu-bilan-commentaire"></div>
+    </div>
+
+    <div class="section-title">Note de ton instructeur</div>
+    <div class="comment-box">
+      <div class="comment-from">Alex Shao — Self-Shao</div>
+      <div id="stu-comment"><span class="comment-empty">Aucun commentaire pour le moment.</span></div>
+    </div>
+    <div class="section-title">Historique des séances</div>
+    <div class="history-list" id="stu-history"></div>
+  </div>
+
+  <!-- ADMIN DASHBOARD -->
+  <div id="screen-admin" class="hidden">
+    <div class="admin-header">
+      <div class="admin-title">ESPACE <span>ADMIN</span></div>
+      <button class="btn-add" id="btn-new-eleve">+ Nouvel élève</button>
+    </div>
+    <div class="eleve-list" id="admin-eleve-list"></div>
+    <div id="admin-edit" class="hidden">
+      <div class="edit-title" id="edit-title">Modifier</div>
+      <div class="edit-section">
+        <span class="edit-section-label">Ajouter une séance</span>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+          <input type="date" class="edit-date" id="edit-cours-date">
+          <input type="text" class="f-input" id="edit-cours-note" placeholder="Note de séance (optionnel)" style="flex:1;margin:0;min-width:180px;">
+          <button class="btn-sm primary" id="btn-add-cours">Ajouter</button>
+        </div>
+      </div>
+      <div class="edit-section">
+        <span class="edit-section-label">Niveaux techniques (0 → 100)</span>
+        <div class="axes-edit-grid" id="axes-edit-grid"></div>
+      </div>
+      <div class="edit-section">
+        <span class="edit-section-label">Commentaire personnalisé</span>
+        <textarea class="edit-textarea" id="edit-comment" placeholder="Ton message à l'élève…"></textarea>
+      </div>
+      <div class="edit-section">
+        <span class="edit-section-label">Identifiants de connexion</span>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+          <div>
+            <label class="f-label">Identifiant</label>
+            <input type="text" class="f-input" id="edit-identifiant" style="margin:0;" placeholder="prenom.nom">
+          </div>
+          <div>
+            <label class="f-label">Mot de passe</label>
+            <input type="text" class="f-input" id="edit-motdepasse" style="margin:0;" placeholder="Nouveau mot de passe">
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+          <div style="flex:1;">
+            <label class="f-label">Email Calendly</label>
+            <input type="email" class="f-input" id="edit-email" style="margin:0;" placeholder="email de l'élève sur Calendly">
+          </div>
+          <button class="btn-sm primary" id="btn-sync-calendly" style="margin-top:18px;padding:10px 16px;">↻ Synchroniser Calendly</button>
+        </div>
+        <div id="sync-msg" style="font-size:0.75rem;color:var(--muted);margin-top:8px;min-height:16px;"></div>
+      </div>
+
+      <div class="edit-section">
+        <span class="edit-section-label">Bilan de la semaine</span>
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap;">
+          <span style="font-size:0.72rem;color:var(--text2);">Semaine du</span>
+          <input type="date" class="edit-date" id="bilan-date-input">
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;" id="bilan-axes-edit"></div>
+        <textarea class="edit-textarea" id="bilan-commentaire-input" placeholder="Commentaire de fin de semaine…" style="min-height:60px;"></textarea>
+      </div>
+
+      <div class="edit-actions">
+        <button class="btn-save" id="btn-save-edit">Enregistrer</button>
+        <button class="btn-cancel" id="btn-cancel-edit">Annuler</button>
+        <span class="save-msg hidden" id="save-msg">Enregistré ✓</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL NEW ELEVE -->
+<div id="modal-overlay" class="hidden">
+  <div class="modal-box">
+    <div class="modal-title">Nouvel élève</div>
+    <label class="f-label">Nom complet</label>
+    <input class="f-input" type="text" id="new-nom" placeholder="Prénom Nom">
+    <label class="f-label">Email (pour sync Calendly)</label>
+    <input class="f-input" type="email" id="new-email" placeholder="prenom@email.com">
+    <label class="f-label">Identifiant</label>
+    <input class="f-input" type="text" id="new-id" placeholder="prenom.nom">
+    <label class="f-label">Mot de passe</label>
+    <input class="f-input" type="text" id="new-pw" placeholder="Mot de passe initial">
+    <div class="modal-err" id="modal-err"></div>
+    <div class="modal-actions">
+      <button class="btn-save" id="btn-create-eleve">Créer</button>
+      <button class="btn-cancel" id="btn-cancel-modal">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const SUPABASE_URL = 'https://iatptgxabyqbqyfdairh.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlhdHB0Z3hhYnlxYnF5ZmRhaXJoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2NzkyOTQsImV4cCI6MjA5MDI1NTI5NH0.XSNXOYTRJd2Nqt9IEcKS4ykaim3piLaQotVo2Zegcvo';
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const ADMIN_ID = 'alex-admin';
+const ADMIN_PW = 'selfshao2024';
+const CALENDLY_TOKEN = 'eyJraWQiOiIxY2UxZTEzNjE3ZGNmNzY2YjNjZWJjY2Y4ZGM1YmFmYThhNjVlNjg0MDIzZjdjMzJiZTgzNDliMjM4MDEzNWI0IiwidHlwIjoiUEFUIiwiYWxnIjoiRVMyNTYifQ.eyJpc3MiOiJodHRwczovL2F1dGguY2FsZW5kbHkuY29tIiwiaWF0IjoxNzc0NjkzMzg0LCJqdGkiOiIzZWMzMjhlZi02NmFkLTQ2M2QtOWI2MC04ZTg1YTc1YjdmYzEiLCJ1c2VyX3V1aWQiOiJjMDUzOWY0MC1mODkzLTQyNjMtOTc5MS02Mzg2Zjc4Zjg4ZmMiLCJzY29wZSI6Imdyb3VwczpyZWFkIG9yZ2FuaXphdGlvbnM6cmVhZCBvcmdhbml6YXRpb25zOndyaXRlIHVzZXJzOnJlYWQgYXZhaWxhYmlsaXR5OnJlYWQgYXZhaWxhYmlsaXR5OndyaXRlIGV2ZW50X3R5cGVzOnJlYWQgZXZlbnRfdHlwZXM6d3JpdGUgbG9jYXRpb25zOnJlYWQgcm91dGluZ19mb3JtczpyZWFkIHNoYXJlczp3cml0ZSBzY2hlZHVsZWRfZXZlbnRzOnJlYWQgc2NoZWR1bGVkX2V2ZW50czp3cml0ZSBzY2hlZHVsaW5nX2xpbmtzOndyaXRlIn0.-JNmPJFkIWQS0meotgM9DqaGi14QhEBB8OOyOMFrq22lbeJuErqA5K0n5tFaSGrStrG4_PQbC_Makh_J9GQktw';
+
+const AXES = [
+  { key:'souplesse',    label:'Souplesse',                    subs:['Haut du corps','Bas du corps'] },
+  { key:'vitesse',      label:'Vitesse',                      subs:['Temps de réaction','Vitesse d\'exécution','Capacité d\'enchaînement'] },
+  { key:'ancrage',      label:'Ancrage',                      subs:['Équilibre','Gestion du poids','Résistance aux poussées'] },
+  { key:'lecture',      label:'Lecture & perception',         subs:['Analyse environnement','Détection signaux faibles','Anticipation'] },
+  { key:'stress',       label:'Gestion du stress',            subs:['Respiration sous pression','Lucidité'] },
+  { key:'puissance',    label:'Puissance',                    subs:['Engagement du corps','Transfert de force','Efficacité réelle'] },
+  { key:'technique',    label:'Technique & précision',        subs:['Justesse du geste','Choix technique','Simplicité'] },
+  { key:'adaptabilite', label:'Adaptabilité & improvisation', subs:['Réaction face à l\'imprévu','Changement de stratégie','Sortir du schéma'] },
+  { key:'mental',       label:'Engagement mental',            subs:['Détermination','Passage à l\'action','Posture mentale'] },
+];
+
+let currentUser = null, isAdmin = false, selectedEleveId = null;
+
+function toast(msg, type='ok'){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = `show ${type}`;
+  setTimeout(() => t.className = '', 2800);
+}
+function fmtDate(d){
+  if(!d) return '—';
+  return new Date(d).toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'});
+}
+function today(){ return new Date().toISOString().split('T')[0]; }
+
+// LOGIN
+document.getElementById('inp-pw').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+document.getElementById('btn-login').addEventListener('click', doLogin);
+
+async function doLogin(){
+  const id = document.getElementById('inp-id').value.trim();
+  const pw = document.getElementById('inp-pw').value.trim();
+  const err = document.getElementById('login-err');
+  const loading = document.getElementById('login-loading');
+  err.textContent = '';
+  loading.classList.remove('hidden');
+  document.getElementById('btn-login').disabled = true;
+
+  if(id === ADMIN_ID && pw === ADMIN_PW){
+    loading.classList.add('hidden');
+    document.getElementById('btn-login').disabled = false;
+    isAdmin = true; currentUser = { nom: 'Alex Shao' };
+    showApp(); return;
+  }
+
+  const { data, error } = await db.from('eleves').select('*').eq('identifiant', id).eq('mot_de_passe', pw).single();
+  loading.classList.add('hidden');
+  document.getElementById('btn-login').disabled = false;
+  if(error || !data){ err.textContent = 'Identifiant ou mot de passe incorrect.'; return; }
+  currentUser = data; isAdmin = false;
+  showApp();
+}
+
+document.getElementById('btn-logout').addEventListener('click', () => {
+  currentUser = null; isAdmin = false; selectedEleveId = null;
+  document.getElementById('screen-app').style.display = 'none';
+  document.getElementById('screen-login').style.display = 'flex';
+  document.getElementById('inp-id').value = '';
+  document.getElementById('inp-pw').value = '';
+});
+
+function showApp(){
+  document.getElementById('screen-login').style.display = 'none';
+  document.getElementById('screen-app').style.display = 'block';
+  document.getElementById('nav-username').textContent = isAdmin ? 'Alex (Admin)' : currentUser.nom;
+  isAdmin ? showAdmin() : showStudent();
+}
+
+// STUDENT
+async function showStudent(){
+  document.getElementById('screen-student').classList.remove('hidden');
+  document.getElementById('screen-admin').classList.add('hidden');
+  document.getElementById('stu-name').textContent = currentUser.nom.toUpperCase();
+  document.getElementById('stu-since').textContent = 'Membre depuis le ' + fmtDate(currentUser.date_inscription);
+
+  const { data: cours } = await db.from('cours').select('*').eq('eleve_id', currentUser.id).order('date', { ascending: false });
+  document.getElementById('stu-cours-count').textContent = cours ? cours.length : 0;
+  document.getElementById('stu-last-cours').textContent = cours && cours.length ? fmtDate(cours[0].date) : '—';
+
+  // Assiduité calculation
+  // 2 cours/semaine x 4.33 semaines x 11 mois = ~95 cours/an
+  const inscription = new Date(currentUser.date_inscription);
+  const now2 = new Date();
+  const weeksElapsed = Math.max(1, Math.floor((now2 - inscription) / (7 * 24 * 3600 * 1000)));
+  const expectedCours = Math.round(weeksElapsed * 2 * (11/12));
+  const nbCours = cours ? cours.length : 0;
+  const assiduPct = Math.min(100, Math.round((nbCours / Math.max(1, expectedCours)) * 100));
+
+  const pctEl = document.getElementById('stu-assiduite-pct');
+  const barEl = document.getElementById('stu-assiduite-bar');
+  const subEl = document.getElementById('stu-assiduite-sub');
+  pctEl.textContent = assiduPct + '%';
+  subEl.textContent = nbCours + ' cours sur ~' + expectedCours + ' attendus';
+  barEl.style.width = assiduPct + '%';
+  barEl.className = 'assiduite-bar-fill ' + (assiduPct >= 75 ? 'green' : assiduPct >= 45 ? 'orange' : 'red');
+  pctEl.style.color = assiduPct >= 75 ? '#4a9a5f' : assiduPct >= 45 ? '#c87820' : '#a83030';
+
+  const hist = document.getElementById('stu-history');
+  hist.innerHTML = '';
+  if(!cours || !cours.length){
+    hist.innerHTML = '<div class="history-empty">Aucune séance enregistrée.</div>';
+  } else {
+    cours.forEach(c => {
+      hist.innerHTML += `<div class="history-item"><div class="history-dot"></div><div class="history-date">${fmtDate(c.date)}</div><div class="history-note">${c.commentaire || ''}</div></div>`;
+    });
+  }
+
+  const { data: prog } = await db.from('progression').select('*').eq('eleve_id', currentUser.id).single();
+  buildAxesGrid(prog);
+  drawRadar(prog);
+
+  const { data: eleve } = await db.from('eleves').select('commentaire').eq('id', currentUser.id).single();
+  // Load bilan hebdo
+  const { data: bilan } = await db.from('bilan_hebdo').select('*').eq('eleve_id', currentUser.id).order('semaine_du', {ascending: false}).limit(1).single();
+  const bilanDateEl = document.getElementById('stu-bilan-date');
+  const bilanAxesEl = document.getElementById('stu-bilan-axes');
+  const bilanComEl = document.getElementById('stu-bilan-commentaire');
+  if(bilan) {
+    bilanDateEl.textContent = 'Semaine du ' + fmtDate(bilan.semaine_du);
+    bilanAxesEl.innerHTML = '';
+    AXES.forEach(ax => {
+      const stars = bilan[ax.key + '_stars'] || 0;
+      let starsHtml = '';
+      for(let i=1;i<=5;i++) starsHtml += `<span class="star ${i<=stars?'filled':''}">★</span>`;
+      bilanAxesEl.innerHTML += `<div class="bilan-axis-item"><div class="bilan-axis-name">${ax.label}</div><div class="stars-wrap">${starsHtml}</div></div>`;
+    });
+    bilanComEl.textContent = bilan.commentaire || '';
+    bilanComEl.style.display = bilan.commentaire ? 'block' : 'none';
+  } else {
+    bilanDateEl.textContent = 'Aucun bilan disponible';
+    bilanAxesEl.innerHTML = '';
+    bilanComEl.textContent = '';
+  }
+
+  const comEl = document.getElementById('stu-comment');
+  comEl.innerHTML = (eleve && eleve.commentaire)
+    ? `<span style="font-style:italic">${eleve.commentaire}</span>`
+    : '<span class="comment-empty">Aucun commentaire pour le moment.</span>';
+}
+
+function buildAxesGrid(prog){
+  const grid = document.getElementById('stu-axes-grid');
+  grid.innerHTML = '';
+  AXES.forEach(ax => {
+    const val = prog ? (prog[ax.key] || 0) : 0;
+    const subs = ax.subs.map(s => `<span class="axis-sub">${s}</span>`).join('');
+    grid.innerHTML += `
+      <div class="axis-card">
+        <div class="axis-name">${ax.label}</div>
+        <div class="axis-score-row">
+          <div class="axis-score">${val}</div>
+          <div class="axis-bar-bg"><div class="axis-bar-fill" style="width:${val}%"></div></div>
+        </div>
+        <div class="axis-subs">${subs}</div>
+      </div>`;
+  });
+}
+
+function drawRadar(prog){
+  const canvas = document.getElementById('radarCanvas');
+  const ctx = canvas.getContext('2d');
+  const cx = 250, cy = 250, r = 175, n = AXES.length;
+  ctx.clearRect(0, 0, 500, 500);
+
+  // rings
+  for(let ring = 1; ring <= 5; ring++){
+    ctx.beginPath();
+    for(let i = 0; i < n; i++){
+      const angle = (i / n) * Math.PI * 2 - Math.PI / 2;
+      const x = cx + r * (ring / 5) * Math.cos(angle);
+      const y = cy + r * (ring / 5) * Math.sin(angle);
+      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    }
+    ctx.closePath();
+    ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+    ctx.lineWidth = 1; ctx.stroke();
+  }
+
+  // spokes
+  for(let i = 0; i < n; i++){
+    const angle = (i / n) * Math.PI * 2 - Math.PI / 2;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(cx + r * Math.cos(angle), cy + r * Math.sin(angle));
+    ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+    ctx.lineWidth = 1; ctx.stroke();
+  }
+
+  // data polygon
+  const vals = AXES.map(ax => prog ? (prog[ax.key] || 0) : 0);
+  ctx.beginPath();
+  vals.forEach((v, i) => {
+    const angle = (i / n) * Math.PI * 2 - Math.PI / 2;
+    const rr = r * (v / 100);
+    const x = cx + rr * Math.cos(angle), y = cy + rr * Math.sin(angle);
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  });
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(139,26,26,0.3)'; ctx.fill();
+  ctx.strokeStyle = '#c8a96e'; ctx.lineWidth = 2; ctx.stroke();
+
+  // dots
+  vals.forEach((v, i) => {
+    const angle = (i / n) * Math.PI * 2 - Math.PI / 2;
+    const rr = r * (v / 100);
+    ctx.beginPath();
+    ctx.arc(cx + rr * Math.cos(angle), cy + rr * Math.sin(angle), 4, 0, Math.PI * 2);
+    ctx.fillStyle = '#c8a96e'; ctx.fill();
+  });
+
+  // labels
+  ctx.fillStyle = 'rgba(184,180,172,0.9)';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  AXES.forEach((ax, i) => {
+    const angle = (i / n) * Math.PI * 2 - Math.PI / 2;
+    const lx = cx + (r + 30) * Math.cos(angle);
+    const ly = cy + (r + 30) * Math.sin(angle);
+    const words = ax.label.split(' ');
+    ctx.font = '600 10.5px DM Sans';
+    if(words.length <= 2){
+      ctx.fillText(ax.label, lx, ly);
+    } else {
+      ctx.fillText(words.slice(0, 2).join(' '), lx, ly - 7);
+      ctx.fillText(words.slice(2).join(' '), lx, ly + 7);
+    }
+  });
+}
+
+// ADMIN
+async function showAdmin(){
+  document.getElementById('screen-admin').classList.remove('hidden');
+  document.getElementById('screen-student').classList.add('hidden');
+  await loadEleves();
+}
+
+async function loadEleves(){
+  const { data } = await db.from('eleves').select('id,nom,identifiant,date_inscription').order('nom');
+  const eleves = data || [];
+  const list = document.getElementById('admin-eleve-list');
+  list.innerHTML = '';
+
+  for(const el of eleves){
+    const { count } = await db.from('cours').select('*', { count: 'exact', head: true }).eq('eleve_id', el.id);
+    const row = document.createElement('div');
+    row.className = 'eleve-row' + (selectedEleveId === el.id ? ' selected' : '');
+    row.innerHTML = `
+      <div>
+        <div class="eleve-nom">${el.nom}</div>
+        <div class="eleve-id">@${el.identifiant}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:16px;">
+        <div class="eleve-cours-count">${count || 0} cours</div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn-sm primary" data-id="${el.id}" data-nom="${el.nom}">Modifier</button>
+          <button class="btn-sm danger" data-del="${el.id}">Supprimer</button>
+        </div>
+      </div>`;
+    list.appendChild(row);
+  }
+
+  list.querySelectorAll('[data-id]').forEach(btn => {
+    btn.addEventListener('click', e => { e.stopPropagation(); openEdit(btn.dataset.id, btn.dataset.nom); });
+  });
+  list.querySelectorAll('[data-del]').forEach(btn => {
+    btn.addEventListener('click', e => { e.stopPropagation(); deleteEleve(btn.dataset.del); });
+  });
+}
+
+async function openEdit(id, nom){
+  selectedEleveId = id;
+  document.getElementById('admin-edit').classList.remove('hidden');
+  document.getElementById('edit-title').textContent = 'Modifier — ' + nom;
+  document.getElementById('edit-cours-date').value = today();
+  document.getElementById('edit-cours-note').value = '';
+  document.getElementById('save-msg').classList.add('hidden');
+
+  const { data: prog } = await db.from('progression').select('*').eq('eleve_id', id).single();
+  const { data: eleve } = await db.from('eleves').select('commentaire,identifiant,mot_de_passe,email').eq('id', id).single();
+
+  const grid = document.getElementById('axes-edit-grid');
+  grid.innerHTML = '';
+  AXES.forEach(ax => {
+    const val = prog ? (prog[ax.key] || 0) : 0;
+    grid.innerHTML += `
+      <div class="axis-edit-item">
+        <div class="axis-edit-name">${ax.label}</div>
+        <div class="axis-edit-row">
+          <input type="range" class="axis-slider" min="0" max="100" value="${val}" data-ax="${ax.key}" id="sl-${ax.key}">
+          <div class="axis-val" id="sv-${ax.key}">${val}</div>
+        </div>
+      </div>`;
+  });
+  grid.querySelectorAll('.axis-slider').forEach(sl => {
+    sl.addEventListener('input', () => { document.getElementById('sv-' + sl.dataset.ax).textContent = sl.value; });
+  });
+
+  // Build bilan étoiles in admin
+  const bilanGrid = document.getElementById('bilan-axes-edit');
+  bilanGrid.innerHTML = '';
+  const { data: lastBilan } = await db.from('bilan_hebdo').select('*').eq('eleve_id', id).order('semaine_du', {ascending:false}).limit(1).single();
+  document.getElementById('bilan-date-input').value = lastBilan ? lastBilan.semaine_du : today();
+  document.getElementById('bilan-commentaire-input').value = lastBilan ? (lastBilan.commentaire || '') : '';
+  AXES.forEach(ax => {
+    const stars = lastBilan ? (lastBilan[ax.key + '_stars'] || 0) : 0;
+    let starsHtml = '';
+    for(let i=1;i<=5;i++) starsHtml += `<span class="star clickable ${i<=stars?'filled':''}" data-ax="${ax.key}" data-val="${i}">★</span>`;
+    bilanGrid.innerHTML += `<div class="bilan-axis-item"><div class="bilan-axis-name" style="font-size:0.7rem;color:var(--text);margin-bottom:4px;">${ax.label}</div><div class="stars-wrap" id="stars-${ax.key}">${starsHtml}</div></div>`;
+  });
+  // Star click handlers
+  bilanGrid.querySelectorAll('.star.clickable').forEach(star => {
+    star.addEventListener('click', () => {
+      const ax = star.dataset.ax;
+      const val = parseInt(star.dataset.val);
+      bilanGrid.querySelectorAll(`[data-ax="${ax}"]`).forEach(s => {
+        s.classList.toggle('filled', parseInt(s.dataset.val) <= val);
+      });
+    });
+  });
+
+  document.getElementById('edit-comment').value = (eleve && eleve.commentaire) || '';
+  document.getElementById('edit-identifiant').value = (eleve && eleve.identifiant) || '';
+  document.getElementById('edit-motdepasse').value = (eleve && eleve.mot_de_passe) || '';
+  document.getElementById('edit-email').value = (eleve && eleve.email) || '';
+  document.getElementById('sync-msg').textContent = '';
+  document.getElementById('admin-edit').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  await loadEleves();
+}
+
+document.getElementById('btn-add-cours').addEventListener('click', async () => {
+  if(!selectedEleveId) return;
+  const date = document.getElementById('edit-cours-date').value;
+  const note = document.getElementById('edit-cours-note').value.trim();
+  if(!date){ toast('Sélectionne une date.', 'err'); return; }
+  await db.from('cours').insert({ eleve_id: selectedEleveId, date, commentaire: note || null });
+  document.getElementById('edit-cours-date').value = today();
+  document.getElementById('edit-cours-note').value = '';
+  toast('Séance ajoutée.');
+  await loadEleves();
+});
+
+document.getElementById('btn-save-edit').addEventListener('click', async () => {
+  if(!selectedEleveId) return;
+  const vals = { eleve_id: selectedEleveId };
+  AXES.forEach(ax => { vals[ax.key] = parseInt(document.getElementById('sl-' + ax.key).value); });
+
+  const { data: existing } = await db.from('progression').select('id').eq('eleve_id', selectedEleveId).single();
+  if(existing){
+    await db.from('progression').update({ ...vals, mis_a_jour: new Date().toISOString() }).eq('eleve_id', selectedEleveId);
+  } else {
+    await db.from('progression').insert({ ...vals, mis_a_jour: new Date().toISOString() });
+  }
+
+  const comment = document.getElementById('edit-comment').value.trim();
+  const newId = document.getElementById('edit-identifiant').value.trim();
+  const newPw = document.getElementById('edit-motdepasse').value.trim();
+  const emailVal = document.getElementById('edit-email').value.trim();
+  const updateData = { commentaire: comment || null };
+  if(newId) updateData.identifiant = newId;
+  if(newPw) updateData.mot_de_passe = newPw;
+  if(emailVal) updateData.email = emailVal;
+  await db.from('eleves').update(updateData).eq('id', selectedEleveId);
+
+  // Save bilan hebdo
+  const bilanDate = document.getElementById('bilan-date-input').value;
+  const bilanCom = document.getElementById('bilan-commentaire-input').value.trim();
+  if(bilanDate) {
+    const bilanVals = { eleve_id: selectedEleveId, semaine_du: bilanDate, commentaire: bilanCom || null };
+    AXES.forEach(ax => {
+      const filled = document.querySelectorAll(`#bilan-axes-edit [data-ax="${ax.key}"].filled`).length;
+      bilanVals[ax.key + '_stars'] = filled;
+    });
+    const { data: existBilan } = await db.from('bilan_hebdo').select('id').eq('eleve_id', selectedEleveId).eq('semaine_du', bilanDate).single();
+    if(existBilan) {
+      await db.from('bilan_hebdo').update(bilanVals).eq('id', existBilan.id);
+    } else {
+      await db.from('bilan_hebdo').insert(bilanVals);
+    }
+  }
+
+  const msg = document.getElementById('save-msg');
+  msg.classList.remove('hidden');
+  setTimeout(() => msg.classList.add('hidden'), 2500);
+  toast('Modifications enregistrées.');
+});
+
+document.getElementById('btn-cancel-edit').addEventListener('click', () => {
+  document.getElementById('admin-edit').classList.add('hidden');
+  selectedEleveId = null;
+  loadEleves();
+});
+
+async function deleteEleve(id){
+  if(!confirm('Supprimer cet élève et toutes ses données ? Cette action est irréversible.')) return;
+  await db.from('cours').delete().eq('eleve_id', id);
+  await db.from('progression').delete().eq('eleve_id', id);
+  await db.from('eleves').delete().eq('id', id);
+  if(selectedEleveId === id){
+    selectedEleveId = null;
+    document.getElementById('admin-edit').classList.add('hidden');
+  }
+  toast('Élève supprimé.');
+  await loadEleves();
+}
+
+// CALENDLY SYNC
+async function syncCalendly(eleveId, email) {
+  const syncMsg = document.getElementById('sync-msg');
+  if(!email) { syncMsg.textContent = 'Aucun email renseigné pour cet élève.'; syncMsg.style.color = '#c05050'; return; }
+  syncMsg.textContent = 'Synchronisation en cours…'; syncMsg.style.color = 'var(--muted)';
+
+  try {
+    // Call Supabase Edge Function (no CORS issues)
+    const fnRes = await fetch('/.netlify/functions/calendly-sync', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+    const fnData = await fnRes.json();
+    if(fnData.error) throw new Error(fnData.error);
+    const matchedEvents = fnData.events || [];
+
+    if(matchedEvents.length === 0) {
+      syncMsg.textContent = `Aucune séance trouvée pour ${email} sur Calendly.`;
+      syncMsg.style.color = '#c05050';
+      return;
+    }
+
+    // Get existing cours for this eleve to avoid duplicates
+    const { data: existing } = await db.from('cours').select('date').eq('eleve_id', eleveId);
+    const existingDates = new Set((existing || []).map(c => c.date));
+
+    // Insert new cours
+    let added = 0;
+    for(const event of matchedEvents) {
+      const date = event.date;
+      if(!existingDates.has(date)) {
+        await db.from('cours').insert({ eleve_id: eleveId, date, commentaire: event.name || null });
+        added++;
+      }
+    }
+
+    syncMsg.textContent = `✓ ${matchedEvents.length} séance(s) trouvée(s) — ${added} ajoutée(s), ${matchedEvents.length - added} déjà enregistrée(s).`;
+    syncMsg.style.color = '#5a9a6a';
+    toast(`Calendly synchronisé — ${added} nouvelle(s) séance(s).`);
+    await loadEleves();
+  } catch(e) {
+    syncMsg.textContent = 'Erreur de synchronisation : ' + e.message;
+    syncMsg.style.color = '#c05050';
+  }
+}
+
+document.addEventListener('click', e => {
+  if(e.target && e.target.id === 'btn-sync-calendly') {
+    const email = document.getElementById('edit-email').value.trim();
+    syncCalendly(selectedEleveId, email);
+  }
+});
+
+// MODAL
+document.getElementById('btn-new-eleve').addEventListener('click', () => {
+  ['new-nom','new-id','new-pw'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('modal-err').textContent = '';
+  document.getElementById('modal-overlay').classList.remove('hidden');
+});
+document.getElementById('btn-cancel-modal').addEventListener('click', () => {
+  document.getElementById('modal-overlay').classList.add('hidden');
+});
+document.getElementById('modal-overlay').addEventListener('click', e => {
+  if(e.target === document.getElementById('modal-overlay'))
+    document.getElementById('modal-overlay').classList.add('hidden');
+});
+document.getElementById('btn-create-eleve').addEventListener('click', async () => {
+  const nom = document.getElementById('new-nom').value.trim();
+  const id = document.getElementById('new-id').value.trim();
+  const pw = document.getElementById('new-pw').value.trim();
+  const err = document.getElementById('modal-err');
+  if(!nom || !id || !pw){ err.textContent = 'Tous les champs sont obligatoires.'; return; }
+  const email = document.getElementById('new-email').value.trim();
+  const { error } = await db.from('eleves').insert({ nom, identifiant: id, mot_de_passe: pw, email: email || null, date_inscription: today() });
+  if(error){ err.textContent = 'Identifiant déjà utilisé ou erreur.'; return; }
+  document.getElementById('modal-overlay').classList.add('hidden');
+  toast('Élève créé avec succès.');
+  await loadEleves();
+});
+</script>
+</body>
+</html>
