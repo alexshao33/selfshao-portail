@@ -811,12 +811,18 @@ document.getElementById('input-csv').addEventListener('change', async (e) => {
   result.textContent = 'Lecture du fichier en cours…';
 
   try {
-    const text = await new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = e => resolve(e.target.result);
-    reader.onerror = () => reject(new Error('Impossible de lire le fichier'));
-    reader.readAsText(file, 'UTF-8');
-  });
+    let text;
+  try { text = await file.text(); }
+  catch(e1) {
+    try {
+      text = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = e => resolve(e.target.result);
+        reader.onerror = reject;
+        reader.readAsText(file);
+      });
+    } catch(e2) { throw new Error('Lecture impossible : ' + e2.message); }
+  }
     const allLines = text.split('\n');
     const headers = allLines[0].split(',').map(h => h.trim().replace(/^"|"$/g,''));
 
