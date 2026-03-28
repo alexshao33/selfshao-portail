@@ -873,7 +873,7 @@ async function syncCalendly(eleveId, email) {
 
   try {
     // Call Supabase Edge Function (no CORS issues)
-    const fnRes = await fetch('/.netlify/functions/calendly-sync', {
+    const fnRes = await fetch('/api/calendly-sync', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email })
