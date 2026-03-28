@@ -4,7 +4,7 @@ async function calendlyGet(url) {
   const res = await fetch(url, {
     headers: { Authorization: `Bearer ${CALENDLY_TOKEN}` }
   });
-  if (!res.ok) throw new Error(`Calendly error ${res.status}`);
+  if (!res.ok) throw new Error(`Calendly error ${res.status}: ${await res.text()}`);
   return res.json();
 }
 
@@ -23,28 +23,33 @@ exports.handler = async (event) => {
     const { email } = JSON.parse(event.body || '{}');
     if (!email) throw new Error('Email manquant');
 
+    // Search directly by invitee email - much faster than looping all events
     const me = await calendlyGet('https://api.calendly.com/users/me');
     const userUri = me.resource.uri;
 
-    let allEvents = [];
-    let nextUrl = `https://api.calendly.com/scheduled_events?user=${encodeURIComponent(userUri)}&status=active&count=100`;
+    const now = new Date().toISOString();
+    let matched = [];
+    let nextUrl = `https://api.calendly.com/scheduled_events?user=${encodeURIComponent(userUri)}&status=active&max_start_time=${now}&count=100&sort=start_time:desc`;
 
     do {
       const data = await calendlyGet(nextUrl);
-      allEvents = allEvents.concat(data.collection || []);
+      const events = data.collection || [];
+      
+      // For each event, check invitees in parallel
+      const checks = await Promise.all(events.map(async (event) => {
+        const uuid = event.uri.split('/').pop();
+        try {
+          const inv = await calendlyGet(`https://api.calendly.com/scheduled_events/${uuid}/invitees?count=100&email=${encodeURIComponent(email)}`);
+          if (inv.collection && inv.collection.length > 0) {
+            return { date: event.start_time.split('T')[0], name: event.name };
+          }
+        } catch(e) {}
+        return null;
+      }));
+
+      matched = matched.concat(checks.filter(Boolean));
       nextUrl = data.pagination?.next_page || null;
     } while (nextUrl);
-
-    const now = new Date();
-    const pastEvents = allEvents.filter(e => new Date(e.end_time) < now);
-
-    const matched = [];
-    for (const event of pastEvents) {
-      const uuid = event.uri.split('/').pop();
-      const inv = await calendlyGet(`https://api.calendly.com/scheduled_events/${uuid}/invitees?count=100`);
-      const found = (inv.collection || []).find(i => i.email.toLowerCase() === email.toLowerCase());
-      if (found) matched.push({ date: event.start_time.split('T')[0], name: event.name });
-    }
 
     return {
       statusCode: 200,
