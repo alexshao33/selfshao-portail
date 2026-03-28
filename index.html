@@ -231,6 +231,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--black);color:var(--text);
     <div class="dash-header">
       <div class="dash-greeting">Tableau de bord</div>
       <div class="dash-name" id="stu-name"></div>
+      <div id="stu-titre" style="font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--accent);margin-top:6px;display:none;"></div>
       <div class="dash-since" id="stu-since"></div>
     </div>
     <div style="text-align:center;margin-bottom:32px;">
@@ -314,6 +315,34 @@ body{font-family:'DM Sans',sans-serif;background:var(--black);color:var(--text);
         <span class="edit-section-label">Commentaire personnalisé</span>
         <textarea class="edit-textarea" id="edit-comment" placeholder="Ton message à l'élève…"></textarea>
       </div>
+      <div class="edit-section">
+        <span class="edit-section-label">Profil élève</span>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+          <div>
+            <label class="f-label">Titre / Niveau</label>
+            <select class="f-input" id="edit-titre" style="margin:0;background:var(--dark);color:var(--white);cursor:pointer;">
+              <option value="">— Aucun —</option>
+              <option value="Élève Shao niv.1">Élève Shao niv.1</option>
+              <option value="Élève Shao niv.2">Élève Shao niv.2</option>
+              <option value="Élève Shao niv.3">Élève Shao niv.3</option>
+              <option value="Élève Shao niv.4">Élève Shao niv.4</option>
+              <option value="Référent groupe">Référent groupe</option>
+              <option value="Instructeur stagiaire">Instructeur stagiaire</option>
+              <option value="Instructeur niv.1">Instructeur niv.1</option>
+              <option value="Instructeur niv.2">Instructeur niv.2</option>
+              <option value="Suspendu">Suspendu</option>
+              <option value="Inactif">Inactif</option>
+            </select>
+          </div>
+          <div>
+            <label class="f-label">Date d'obtention</label>
+            <input type="date" class="edit-date" id="edit-date-niveau" style="width:100%;">
+          </div>
+        </div>
+        <label class="f-label">Note privée (non visible par l'élève)</label>
+        <textarea class="edit-textarea" id="edit-note-privee" placeholder="Observations personnelles, contexte, points de vigilance…" style="min-height:70px;border-color:var(--red);"></textarea>
+      </div>
+
       <div class="edit-section">
         <span class="edit-section-label">Identifiants de connexion</span>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
@@ -460,6 +489,11 @@ async function showStudent(){
   document.getElementById('screen-student').classList.remove('hidden');
   document.getElementById('screen-admin').classList.add('hidden');
   document.getElementById('stu-name').textContent = currentUser.nom.toUpperCase();
+  if(currentUser.titre) {
+    const titreEl = document.getElementById('stu-titre');
+    titreEl.textContent = currentUser.titre;
+    titreEl.style.display = 'block';
+  }
   // Date will be set after loading cours
 
   const { data: cours } = await db.from('cours').select('*').eq('eleve_id', currentUser.id).order('date', { ascending: false });
@@ -677,7 +711,7 @@ async function openEdit(id, nom){
   document.getElementById('save-msg').classList.add('hidden');
 
   const { data: prog } = await db.from('progression').select('*').eq('eleve_id', id).single();
-  const { data: eleve } = await db.from('eleves').select('commentaire,identifiant,mot_de_passe,email').eq('id', id).single();
+  const { data: eleve } = await db.from('eleves').select('commentaire,identifiant,mot_de_passe,email,titre,date_niveau,note_privee').eq('id', id).single();
 
   const grid = document.getElementById('axes-edit-grid');
   grid.innerHTML = '';
@@ -723,6 +757,9 @@ async function openEdit(id, nom){
   document.getElementById('edit-identifiant').value = (eleve && eleve.identifiant) || '';
   document.getElementById('edit-motdepasse').value = (eleve && eleve.mot_de_passe) || '';
   document.getElementById('edit-email').value = (eleve && eleve.email) || '';
+  document.getElementById('edit-titre').value = (eleve && eleve.titre) || '';
+  document.getElementById('edit-date-niveau').value = (eleve && eleve.date_niveau) || '';
+  document.getElementById('edit-note-privee').value = (eleve && eleve.note_privee) || '';
   document.getElementById('sync-msg').textContent = '';
   document.getElementById('admin-edit').scrollIntoView({ behavior: 'smooth', block: 'start' });
   await loadEleves();
@@ -756,10 +793,16 @@ document.getElementById('btn-save-edit').addEventListener('click', async () => {
   const newId = document.getElementById('edit-identifiant').value.trim();
   const newPw = document.getElementById('edit-motdepasse').value.trim();
   const emailVal = document.getElementById('edit-email').value.trim();
+  const titreVal = document.getElementById('edit-titre').value;
+  const dateNiveauVal = document.getElementById('edit-date-niveau').value;
+  const notePriveeVal = document.getElementById('edit-note-privee').value.trim();
   const updateData = { commentaire: comment || null };
   if(newId) updateData.identifiant = newId;
   if(newPw) updateData.mot_de_passe = newPw;
   if(emailVal) updateData.email = emailVal;
+  updateData.titre = titreVal || null;
+  updateData.date_niveau = dateNiveauVal || null;
+  updateData.note_privee = notePriveeVal || null;
   await db.from('eleves').update(updateData).eq('id', selectedEleveId);
 
   // Save bilan hebdo
