@@ -276,8 +276,15 @@ body{font-family:'DM Sans',sans-serif;background:var(--black);color:var(--text);
   <div id="screen-admin" class="hidden">
     <div class="admin-header">
       <div class="admin-title">ESPACE <span>ADMIN</span></div>
-      <button class="btn-add" id="btn-new-eleve">+ Nouvel élève</button>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <label class="btn-add" style="cursor:pointer;" id="label-import-csv">
+          ↑ Importer CSV Calendly
+          <input type="file" id="input-csv" accept=".csv" style="display:none;">
+        </label>
+        <button class="btn-add" id="btn-new-eleve">+ Nouvel élève</button>
+      </div>
     </div>
+    <div id="csv-import-result" style="display:none;background:var(--panel);border:1px solid var(--border);border-left:2px solid var(--accent);padding:16px 20px;margin-bottom:20px;font-size:0.82rem;line-height:1.7;color:var(--text);"></div>
     <div class="eleve-list" id="admin-eleve-list"></div>
     <div id="admin-edit" class="hidden">
       <div class="edit-title" id="edit-title">Modifier</div>
@@ -772,6 +779,72 @@ async function deleteEleve(id){
   toast('Élève supprimé.');
   await loadEleves();
 }
+
+
+// CSV IMPORT
+document.getElementById('input-csv').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if(!file) return;
+  const result = document.getElementById('csv-import-result');
+  result.style.display = 'block';
+  result.textContent = 'Lecture du fichier en cours…';
+
+  try {
+    const text = await file.text();
+    const allLines = text.split('\n');
+    const headers = allLines[0].split(',').map(h => h.trim().replace(/^"|"$/g,''));
+
+    const emailIdx = headers.findIndex(h => /invitee email/i.test(h));
+    const dateIdx  = headers.findIndex(h => /start date/i.test(h));
+    const cancelIdx= headers.findIndex(h => /^canceled$/i.test(h));
+    const typeIdx  = headers.findIndex(h => /event type name/i.test(h));
+
+    if(emailIdx===-1||dateIdx===-1){ result.textContent='❌ Format CSV non reconnu.'; return; }
+
+    // Load all eleves with email
+    const { data: eleves } = await db.from('eleves').select('id,email,nom');
+    const eleveMap = {};
+    (eleves||[]).forEach(el => { if(el.email) eleveMap[el.email.toLowerCase().trim()] = el; });
+
+    // Parse rows and group by eleve
+    const byEleve = {};
+    for(let i=1;i<allLines.length;i++){
+      const row = allLines[i].split(',').map(c=>c.trim().replace(/^['"]|['"]$/g,''));
+      if(row.length<3) continue;
+      const email   = (row[emailIdx]||'').toLowerCase().trim();
+      const dateRaw = (row[dateIdx]||'').trim();
+      const canceled= (row[cancelIdx]||'').toLowerCase();
+      if(!email||!dateRaw||canceled==='true') continue;
+      const date = dateRaw.split(' ')[0];
+      if(!/\d{4}-\d{2}-\d{2}/.test(date)) continue;
+      if(new Date(date) >= new Date()) continue; // skip future
+      const eleve = eleveMap[email];
+      if(!eleve) continue;
+      if(!byEleve[eleve.id]) byEleve[eleve.id] = {nom:eleve.nom, dates:new Set()};
+      byEleve[eleve.id].dates.add(date);
+    }
+
+    // For each eleve, load existing cours and insert missing ones
+    let totalAdded = 0;
+    const summary = [];
+    for(const [eleveId, info] of Object.entries(byEleve)){
+      const { data: existing } = await db.from('cours').select('date').eq('eleve_id', eleveId);
+      const existingDates = new Set((existing||[]).map(c=>c.date));
+      const toInsert = [...info.dates].filter(d=>!existingDates.has(d));
+      if(toInsert.length>0){
+        await db.from('cours').insert(toInsert.map(date=>({eleve_id:eleveId, date, commentaire:'Import Calendly'})));
+        totalAdded += toInsert.length;
+      }
+      summary.push(`${info.nom} : +${toInsert.length} séance(s) (${info.dates.size} dans le CSV)`);
+    }
+
+    result.innerHTML = `<strong>✓ Import terminé — ${totalAdded} séance(s) ajoutée(s)</strong><br><br>` + summary.join('<br>');
+    toast(`Import CSV terminé — ${totalAdded} séances ajoutées.`);
+    await loadEleves();
+  } catch(err) {
+    result.textContent = '❌ Erreur : ' + err.message;
+  }
+});
 
 // CALENDLY SYNC
 async function syncCalendly(eleveId, email) {
