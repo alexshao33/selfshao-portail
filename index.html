@@ -548,9 +548,9 @@ function drawRadar(prog){
   const svg = document.getElementById('radarSVG');
   const vals = AXES.map(ax => prog ? (prog[ax.key]||0) : 0);
   const n = AXES.length;
-  const cx = 250, cy = 250, r = 155;
+  const cx = 250, cy = 250, r = 120;
   // Label radius - enough space for text
-  const lr = 230;
+  const lr = 195;
 
   let html = '';
 
