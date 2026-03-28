@@ -888,7 +888,7 @@ document.getElementById('input-csv').addEventListener('change', async (e) => {
     // Robust CSV parser - handles quoted fields with commas inside
     function parseCSV(str) {
       const rows = [];
-      const lines = str.replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n');
+      const lines = str.split('\n').map(function(l){return l[l.length-1]==='\r'?l.slice(0,-1):l;});
       for(const line of lines) {
         if(!line.trim()) continue;
         const row = [];
