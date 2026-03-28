@@ -326,7 +326,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--black);color:var(--text);
               <option value="Élève Shao niv.2">Élève Shao niv.2</option>
               <option value="Élève Shao niv.3">Élève Shao niv.3</option>
               <option value="Élève Shao niv.4">Élève Shao niv.4</option>
-              <option value="Référent groupe">Référent groupe</option>
               <option value="Instructeur stagiaire">Instructeur stagiaire</option>
               <option value="Instructeur niv.1">Instructeur niv.1</option>
               <option value="Instructeur niv.2">Instructeur niv.2</option>
@@ -338,6 +337,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--black);color:var(--text);
             <label class="f-label">Date d'obtention</label>
             <input type="date" class="edit-date" id="edit-date-niveau" style="width:100%;">
           </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+          <input type="checkbox" id="edit-referent" style="width:16px;height:16px;accent-color:var(--accent);cursor:pointer;">
+          <label for="edit-referent" style="font-size:0.78rem;color:var(--text);cursor:pointer;">Référent groupe</label>
         </div>
         <label class="f-label">Note privée (non visible par l'élève)</label>
         <textarea class="edit-textarea" id="edit-note-privee" placeholder="Observations personnelles, contexte, points de vigilance…" style="min-height:70px;border-color:var(--red);"></textarea>
@@ -489,9 +492,12 @@ async function showStudent(){
   document.getElementById('screen-student').classList.remove('hidden');
   document.getElementById('screen-admin').classList.add('hidden');
   document.getElementById('stu-name').textContent = currentUser.nom.toUpperCase();
-  if(currentUser.titre) {
-    const titreEl = document.getElementById('stu-titre');
-    titreEl.textContent = currentUser.titre;
+  const titreEl = document.getElementById('stu-titre');
+  const parts = [];
+  if(currentUser.titre) parts.push(currentUser.titre);
+  if(currentUser.referent_groupe) parts.push('Référent groupe');
+  if(parts.length > 0) {
+    titreEl.textContent = parts.join(' · ');
     titreEl.style.display = 'block';
   }
   // Date will be set after loading cours
@@ -711,7 +717,7 @@ async function openEdit(id, nom){
   document.getElementById('save-msg').classList.add('hidden');
 
   const { data: prog } = await db.from('progression').select('*').eq('eleve_id', id).single();
-  const { data: eleve } = await db.from('eleves').select('commentaire,identifiant,mot_de_passe,email,titre,date_niveau,note_privee').eq('id', id).single();
+  const { data: eleve } = await db.from('eleves').select('commentaire,identifiant,mot_de_passe,email,titre,date_niveau,note_privee,referent_groupe').eq('id', id).single();
 
   const grid = document.getElementById('axes-edit-grid');
   grid.innerHTML = '';
@@ -760,6 +766,7 @@ async function openEdit(id, nom){
   document.getElementById('edit-titre').value = (eleve && eleve.titre) || '';
   document.getElementById('edit-date-niveau').value = (eleve && eleve.date_niveau) || '';
   document.getElementById('edit-note-privee').value = (eleve && eleve.note_privee) || '';
+  document.getElementById('edit-referent').checked = (eleve && eleve.referent_groupe) || false;
   document.getElementById('sync-msg').textContent = '';
   document.getElementById('admin-edit').scrollIntoView({ behavior: 'smooth', block: 'start' });
   await loadEleves();
@@ -803,6 +810,7 @@ document.getElementById('btn-save-edit').addEventListener('click', async () => {
   updateData.titre = titreVal || null;
   updateData.date_niveau = dateNiveauVal || null;
   updateData.note_privee = notePriveeVal || null;
+  updateData.referent_groupe = document.getElementById('edit-referent').checked;
   await db.from('eleves').update(updateData).eq('id', selectedEleveId);
 
   // Save bilan hebdo
