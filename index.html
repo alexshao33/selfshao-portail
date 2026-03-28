@@ -416,19 +416,19 @@ const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const ADMIN_ID = 'alex-admin';
 const ADMIN_PW = 'selfshao2024';
-const CALENDLY_TOKEN = 'eyJraWQiOiIxY2UxZTEzNjE3ZGNmNzY2YjNjZWJjY2Y4ZGM1YmFmYThhNjVlNjg0MDIzZjdjMzJiZTgzNDliMjM4MDEzNWI0IiwidHlwIjoiUEFUIiwiYWxnIjoiRVMyNTYifQ.eyJpc3MiOiJodHRwczovL2F1dGguY2FsZW5kbHkuY29tIiwiaWF0IjoxNzc0NjkzMzg0LCJqdGkiOiIzZWMzMjhlZi02NmFkLTQ2M2QtOWI2MC04ZTg1YTc1YjdmYzEiLCJ1c2VyX3V1aWQiOiJjMDUzOWY0MC1mODkzLTQyNjMtOTc5MS02Mzg2Zjc4Zjg4ZmMiLCJzY29wZSI6Imdyb3VwczpyZWFkIG9yZ2FuaXphdGlvbnM6cmVhZCBvcmdhbml6YXRpb25zOndyaXRlIHVzZXJzOnJlYWQgYXZhaWxhYmlsaXR5OnJlYWQgYXZhaWxhYmlsaXR5OndyaXRlIGV2ZW50X3R5cGVzOnJlYWQgZXZlbnRfdHlwZXM6d3JpdGUgbG9jYXRpb25zOnJlYWQgcm91dGluZ19mb3JtczpyZWFkIHNoYXJlczp3cml0ZSBzY2hlZHVsZWRfZXZlbnRzOnJlYWQgc2NoZWR1bGVkX2V2ZW50czp3cml0ZSBzY2hlZHVsaW5nX2xpbmtzOndyaXRlIn0.-JNmPJFkIWQS0meotgM9DqaGi14QhEBB8OOyOMFrq22lbeJuErqA5K0n5tFaSGrStrG4_PQbC_Makh_J9GQktw';
+
 
 const AXES = [
-  { key:'souplesse',    label:'Souplesse',                    subs:['Haut du corps','Bas du corps'] },
-  { key:'vitesse',      label:'Vitesse',                      subs:['Temps de réaction','Vitesse d\'exécution','Capacité d\'enchaînement'] },
-  { key:'ancrage',      label:'Ancrage',                      subs:['Équilibre','Gestion du poids','Résistance aux poussées'] },
-  { key:'lecture',      label:'Lecture & perception',         subs:['Analyse environnement','Détection signaux faibles','Anticipation'] },
-  { key:'stress',       label:'Gestion du stress',            subs:['Respiration sous pression','Lucidité'] },
-  { key:'puissance',    label:'Puissance',                    subs:['Engagement du corps','Transfert de force','Efficacité réelle'] },
-  { key:'technique',    label:'Technique & précision',        subs:['Justesse du geste','Choix technique','Simplicité'] },
-  { key:'adaptabilite', label:'Adaptabilité & improvisation', subs:['Réaction face à l\'imprévu','Changement de stratégie','Sortir du schéma'] },
-  { key:'mental',       label:'Engagement mental',            subs:['Détermination','Passage à l\'action','Posture mentale'] },
-  { key:'cardio',       label:'Cardio & endurance',           subs:['Reprise du souffle','Respiration','Endurance'] },
+  { key:"souplesse",    label:"Souplesse",                    subs:["Haut du corps","Bas du corps"] },
+  { key:"vitesse",      label:"Vitesse",                      subs:["Temps de réaction","Vitesse d'exécution","Capacité d'enchaînement"] },
+  { key:"ancrage",      label:"Ancrage",                      subs:["Équilibre","Gestion du poids","Résistance aux poussées"] },
+  { key:"lecture",      label:"Lecture & perception",         subs:["Analyse environnement","Détection signaux faibles","Anticipation"] },
+  { key:"stress",       label:"Gestion du stress",            subs:["Respiration sous pression","Lucidité"] },
+  { key:"puissance",    label:"Puissance",                    subs:["Engagement du corps","Transfert de force","Efficacité réelle"] },
+  { key:"technique",    label:"Technique & précision",        subs:["Justesse du geste","Choix technique","Simplicité"] },
+  { key:"adaptabilite", label:"Adaptabilité & improvisation", subs:["Réaction face à l'imprévu","Changement de stratégie","Sortir du schéma"] },
+  { key:"mental",       label:"Engagement mental",            subs:["Détermination","Passage à l'action","Posture mentale"] },
+  { key:"cardio",       label:"Cardio & endurance",           subs:["Reprise du souffle","Respiration","Endurance"] },
 ];
 
 let currentUser = null, isAdmin = false, selectedEleveId = null;
@@ -913,7 +913,7 @@ document.getElementById('input-csv').addEventListener('change', async (e) => {
     const dateIdx   = headers.findIndex(h => h.includes('start date'));
     const cancelIdx = headers.findIndex(h => h === 'canceled');
 
-    if(emailIdx===-1||dateIdx===-1) throw new Error('Format CSV non reconnu — vérifiez que c'est un export Calendly');
+    if(emailIdx===-1||dateIdx===-1) throw new Error("Format CSV non reconnu — export Calendly attendu");
 
     result.textContent = `Analyse de ${rows.length-1} lignes…`;
 
