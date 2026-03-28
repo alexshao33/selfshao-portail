@@ -542,11 +542,11 @@ function buildAxesGrid(prog){
 
 function drawRadar(prog){
   const canvas = document.getElementById('radarCanvas');
-  // Responsive size
-  const size = Math.min(canvas.parentElement.clientWidth - 40, 480);
+  // Responsive size - extra space for labels
+  const size = Math.min(canvas.parentElement.clientWidth - 20, 560);
   canvas.width = size; canvas.height = size;
   const ctx = canvas.getContext('2d');
-  const cx = size/2, cy = size/2, r = size*0.34, n = AXES.length;
+  const cx = size/2, cy = size/2, r = size*0.22, n = AXES.length;
   ctx.clearRect(0, 0, size, size);
 
   // rings
@@ -602,10 +602,10 @@ function drawRadar(prog){
   });
 
   // labels - bigger, white, readable
-  const labelR = r + size * 0.13;
+  const labelR = r + size * 0.22;
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
   ctx.fillStyle = '#f0ece4';
-  const fontSize = Math.max(11, size * 0.028);
+  const fontSize = Math.max(12, size * 0.026);
   ctx.font = `600 ${fontSize}px DM Sans`;
   AXES.forEach((ax, i) => {
     const angle = (i / n) * Math.PI * 2 - Math.PI / 2;
