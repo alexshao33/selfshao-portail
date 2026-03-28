@@ -492,6 +492,9 @@ async function showStudent(){
   document.getElementById('screen-student').classList.remove('hidden');
   document.getElementById('screen-admin').classList.add('hidden');
   document.getElementById('stu-name').textContent = currentUser.nom.toUpperCase();
+  // Force reload profile to get latest fields
+  const { data: freshProfile } = await db.from('eleves').select('titre,referent_groupe').eq('id', currentUser.id).single();
+  if(freshProfile) { currentUser.titre = freshProfile.titre; currentUser.referent_groupe = freshProfile.referent_groupe; }
   const titreEl = document.getElementById('stu-titre');
   const parts = [];
   if(currentUser.titre) parts.push(currentUser.titre);
@@ -499,6 +502,8 @@ async function showStudent(){
   if(parts.length > 0) {
     titreEl.textContent = parts.join(' · ');
     titreEl.style.display = 'block';
+  } else {
+    titreEl.style.display = 'none';
   }
   // Date will be set after loading cours
 
