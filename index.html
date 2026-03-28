@@ -472,17 +472,20 @@ async function showStudent(){
   }
 
   // Assiduité calculation
-  // Référence : 2 cours/semaine, 11 mois/an (48 semaines actives)
-  // On compte les semaines réelles écoulées depuis l'inscription en excluant 1 mois de vacances
+  // Référence : 2 cours/semaine, 11 mois actifs/an
+  // Base : date du PREMIER cours (pas date inscription du portail)
   const nbCours = cours ? cours.length : 0;
-  const inscription = new Date(currentUser.date_inscription);
-  const now2 = new Date();
   const msPerWeek = 7 * 24 * 3600 * 1000;
-  const totalWeeks = Math.max(1, (now2 - inscription) / msPerWeek);
-  // 11 mois actifs sur 12 = 91.7% des semaines
-  const activeWeeks = totalWeeks * (11/12);
-  const expectedCours = Math.round(activeWeeks * 2);
-  const assiduPct = Math.min(100, Math.round((nbCours / Math.max(1, expectedCours)) * 100));
+  const now2 = new Date();
+  let expectedCours = 1;
+  if(cours && cours.length > 0) {
+    const sorted = cours.slice().sort((a,b) => a.date.localeCompare(b.date));
+    const firstCours = new Date(sorted[0].date);
+    const totalWeeks = Math.max(1, (now2 - firstCours) / msPerWeek);
+    const activeWeeks = totalWeeks * (11/12);
+    expectedCours = Math.max(1, Math.round(activeWeeks * 2));
+  }
+  const assiduPct = Math.min(100, Math.round((nbCours / expectedCours) * 100));
 
   const pctEl = document.getElementById('stu-assiduite-pct');
   const barEl = document.getElementById('stu-assiduite-bar');
