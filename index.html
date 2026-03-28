@@ -449,7 +449,6 @@ document.getElementById('btn-logout').addEventListener('click', () => {
 function showApp(){
   document.getElementById('screen-login').style.display = 'none';
   document.getElementById('screen-app').style.display = 'block';
-  window.scrollTo(0, 0);
   document.getElementById('nav-username').textContent = isAdmin ? 'Alex (Admin)' : currentUser.nom;
   isAdmin ? showAdmin() : showStudent();
 }
@@ -524,6 +523,7 @@ async function showStudent(){
     bilanComEl.textContent = '';
   }
 
+  window.scrollTo({top:0, behavior:'instant'});
   const comEl = document.getElementById('stu-comment');
   comEl.innerHTML = (eleve && eleve.commentaire)
     ? `<span style="font-style:italic">${eleve.commentaire}</span>`
@@ -639,6 +639,7 @@ function drawRadar(prog){
 async function showAdmin(){
   document.getElementById('screen-admin').classList.remove('hidden');
   document.getElementById('screen-student').classList.add('hidden');
+  window.scrollTo({top:0, behavior:'instant'});
   await loadEleves();
 }
 
