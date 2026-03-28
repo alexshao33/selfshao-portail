@@ -180,9 +180,15 @@ body{font-family:'DM Sans',sans-serif;background:var(--black);color:var(--text);
 .bilan-commentaire{font-size:0.85rem;color:var(--text);line-height:1.65;font-style:italic;padding-top:12px;border-top:1px solid var(--border);}
 .edit-section-label{font-size:0.62rem;letter-spacing:0.22em;text-transform:uppercase;color:var(--accent);margin-bottom:14px;display:block;}
 
-@media(max-width:600px){
+@media(max-width:640px){
   .axes-grid,.axes-edit-grid,.stats-row{grid-template-columns:1fr;}
   .admin-header{flex-direction:column;align-items:flex-start;gap:14px;}
+  #screen-student,#screen-admin{padding:20px 14px 60px;}
+  .login-card{width:100%;padding:0 16px;}
+  .login-box{padding:28px 20px 24px;}
+  .dash-name{font-size:1.8rem;}
+  .bilan-axes,.axes-edit-grid{grid-template-columns:1fr;}
+  .edit-section > div[style*="grid"]{grid-template-columns:1fr !important;}
 }
 </style>
 </head>
@@ -252,8 +258,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--black);color:var(--text);
     </div>
 
     <div class="section-title">Progression technique</div>
-    <div class="radar-wrap">
-      <canvas id="radarCanvas" width="500" height="500"></canvas>
+    <div class="radar-wrap" style="padding:20px;">
+      <canvas id="radarCanvas" style="max-width:100%;display:block;margin:0 auto;"></canvas>
     </div>
     <div class="axes-grid" id="stu-axes-grid"></div>
     <div class="section-title">Bilan de la semaine</div>
@@ -536,9 +542,12 @@ function buildAxesGrid(prog){
 
 function drawRadar(prog){
   const canvas = document.getElementById('radarCanvas');
+  // Responsive size
+  const size = Math.min(canvas.parentElement.clientWidth - 40, 480);
+  canvas.width = size; canvas.height = size;
   const ctx = canvas.getContext('2d');
-  const cx = 250, cy = 250, r = 175, n = AXES.length;
-  ctx.clearRect(0, 0, 500, 500);
+  const cx = size/2, cy = size/2, r = size*0.34, n = AXES.length;
+  ctx.clearRect(0, 0, size, size);
 
   // rings
   for(let ring = 1; ring <= 5; ring++){
@@ -550,7 +559,7 @@ function drawRadar(prog){
       i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
     }
     ctx.closePath();
-    ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+    ctx.strokeStyle = 'rgba(200,169,110,0.15)';
     ctx.lineWidth = 1; ctx.stroke();
   }
 
@@ -560,11 +569,11 @@ function drawRadar(prog){
     ctx.beginPath();
     ctx.moveTo(cx, cy);
     ctx.lineTo(cx + r * Math.cos(angle), cy + r * Math.sin(angle));
-    ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+    ctx.strokeStyle = 'rgba(200,169,110,0.12)';
     ctx.lineWidth = 1; ctx.stroke();
   }
 
-  // data polygon
+  // data polygon - golden fill
   const vals = AXES.map(ax => prog ? (prog[ax.key] || 0) : 0);
   ctx.beginPath();
   vals.forEach((v, i) => {
@@ -574,7 +583,10 @@ function drawRadar(prog){
     i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
   });
   ctx.closePath();
-  ctx.fillStyle = 'rgba(139,26,26,0.3)'; ctx.fill();
+  const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+  grad.addColorStop(0, 'rgba(200,169,110,0.55)');
+  grad.addColorStop(1, 'rgba(139,90,20,0.25)');
+  ctx.fillStyle = grad; ctx.fill();
   ctx.strokeStyle = '#c8a96e'; ctx.lineWidth = 2; ctx.stroke();
 
   // dots
@@ -582,24 +594,29 @@ function drawRadar(prog){
     const angle = (i / n) * Math.PI * 2 - Math.PI / 2;
     const rr = r * (v / 100);
     ctx.beginPath();
-    ctx.arc(cx + rr * Math.cos(angle), cy + rr * Math.sin(angle), 4, 0, Math.PI * 2);
-    ctx.fillStyle = '#c8a96e'; ctx.fill();
+    ctx.arc(cx + rr * Math.cos(angle), cy + rr * Math.sin(angle), 5, 0, Math.PI * 2);
+    ctx.fillStyle = '#c8a96e';
+    ctx.strokeStyle = '#080808';
+    ctx.lineWidth = 1.5;
+    ctx.fill(); ctx.stroke();
   });
 
-  // labels
-  ctx.fillStyle = 'rgba(184,180,172,0.9)';
+  // labels - bigger, white, readable
+  const labelR = r + size * 0.13;
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillStyle = '#f0ece4';
+  const fontSize = Math.max(11, size * 0.028);
+  ctx.font = `600 ${fontSize}px DM Sans`;
   AXES.forEach((ax, i) => {
     const angle = (i / n) * Math.PI * 2 - Math.PI / 2;
-    const lx = cx + (r + 30) * Math.cos(angle);
-    const ly = cy + (r + 30) * Math.sin(angle);
+    const lx = cx + labelR * Math.cos(angle);
+    const ly = cy + labelR * Math.sin(angle);
     const words = ax.label.split(' ');
-    ctx.font = '600 10.5px DM Sans';
     if(words.length <= 2){
       ctx.fillText(ax.label, lx, ly);
     } else {
-      ctx.fillText(words.slice(0, 2).join(' '), lx, ly - 7);
-      ctx.fillText(words.slice(2).join(' '), lx, ly + 7);
+      ctx.fillText(words.slice(0, 2).join(' '), lx, ly - fontSize * 0.7);
+      ctx.fillText(words.slice(2).join(' '), lx, ly + fontSize * 0.7);
     }
   });
 }
