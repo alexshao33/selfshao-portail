@@ -875,42 +875,32 @@ document.getElementById('input-csv').addEventListener('change', async (e) => {
   result.textContent = 'Lecture du fichier en cours…';
 
   try {
+    // Robust file reading
     const text = await new Promise((resolve, reject) => {
       const reader = new FileReader();
-      reader.onload = ev => resolve(ev.target.result);
+      reader.onload = e => resolve(e.target.result);
       reader.onerror = () => reject(new Error('Fichier illisible'));
       reader.readAsText(file, 'UTF-8');
     });
 
     if(!text || text.length < 10) throw new Error('Fichier vide ou illisible');
 
+    // Robust CSV parser - handles quoted fields with commas inside
     function parseCSV(str) {
       const rows = [];
-      let row = [];
-      let cur = '';
-      let inQuotes = false;
-      for (let i = 0; i < str.length; i++) {
-        const ch = str[i];
-        const next = str[i + 1];
-        if (ch === '"') {
-          if (inQuotes && next === '"') { cur += '"'; i++; }
-          else { inQuotes = !inQuotes; }
-        } else if (ch === ',' && !inQuotes) {
-          row.push(cur);
-          cur = '';
-        } else if ((ch === '\n' || ch === '\r') && !inQuotes) {
-          if (ch === '\r' && next === '\n') i++;
-          row.push(cur);
-          if (row.some(cell => String(cell).trim() !== '')) rows.push(row.map(v => String(v).trim()));
-          row = [];
-          cur = '';
-        } else {
-          cur += ch;
+      const lines = str.split('\n').map(function(l){return l[l.length-1]==='\r'?l.slice(0,-1):l;});
+      for(const line of lines) {
+        if(!line.trim()) continue;
+        const row = [];
+        let inQuotes = false, cur = '';
+        for(let i=0;i<line.length;i++){
+          const ch = line[i];
+          if(ch==='"'){ inQuotes=!inQuotes; }
+          else if(ch===','&&!inQuotes){ row.push(cur.trim()); cur=''; }
+          else { cur+=ch; }
         }
-      }
-      if (cur.length || row.length) {
-        row.push(cur);
-        if (row.some(cell => String(cell).trim() !== '')) rows.push(row.map(v => String(v).trim()));
+        row.push(cur.trim());
+        rows.push(row);
       }
       return rows;
     }
@@ -919,127 +909,60 @@ document.getElementById('input-csv').addEventListener('change', async (e) => {
     if(rows.length < 2) throw new Error('CSV trop court');
 
     const headers = rows[0].map(h => h.replace(/^"|"$/g,'').toLowerCase().trim());
-    const findIndex = (label) => headers.findIndex(h => h.includes(label));
-
-    const inviteeNameIdx = findIndex('invitee name');
-    const emailIdx = findIndex('invitee email');
-    const eventTypeIdx = findIndex('event type name');
-    const dateIdx = findIndex('start date');
+    const emailIdx  = headers.findIndex(h => h.includes('invitee email'));
+    const dateIdx   = headers.findIndex(h => h.includes('start date'));
     const cancelIdx = headers.findIndex(h => h === 'canceled');
-    const eventUuidIdx = findIndex('event uuid');
 
-    if(emailIdx === -1 || dateIdx === -1) {
-      throw new Error('Format CSV non reconnu — export Calendly attendu');
-    }
+    if(emailIdx===-1||dateIdx===-1) throw new Error("Format CSV non reconnu — export Calendly attendu");
 
-    result.textContent = `Analyse de ${rows.length - 1} lignes…`;
+    result.textContent = `Analyse de ${rows.length-1} lignes…`;
 
-    const { data: eleves, error: elevesError } = await db.from('eleves').select('id,email,nom');
-    if(elevesError) throw elevesError;
-
+    // Load all eleves with email
+    const { data: eleves } = await db.from('eleves').select('id,email,nom');
     const eleveMap = {};
-    (eleves || []).forEach(el => {
-      if(el.email) eleveMap[String(el.email).toLowerCase().trim()] = el;
-    });
+    (eleves||[]).forEach(el => { if(el.email) eleveMap[el.email.toLowerCase().trim()] = el; });
 
-    const reservationRows = [];
-    const pastDatesByEleve = {};
+    // Group dates by eleve
+    const byEleve = {};
     let skipped = 0;
-    let unmatched = 0;
-    let cancelled = 0;
-
-    for(let i = 1; i < rows.length; i++) {
+    for(let i=1;i<rows.length;i++){
       const row = rows[i];
-      const email = String(row[emailIdx] || '').replace(/^['"]|['"]$/g,'').toLowerCase().trim();
-      const inviteeName = inviteeNameIdx >= 0 ? String(row[inviteeNameIdx] || '').replace(/^['"]|['"]$/g,'').trim() : '';
-      const eventType = eventTypeIdx >= 0 ? String(row[eventTypeIdx] || '').replace(/^['"]|['"]$/g,'').trim() : 'Cours';
-      const eventUuid = eventUuidIdx >= 0 ? String(row[eventUuidIdx] || '').replace(/^['"]|['"]$/g,'').trim() : '';
-      const dateRaw = String(row[dateIdx] || '').replace(/^['"]|['"]$/g,'').trim();
-      const canceled = cancelIdx >= 0 ? String(row[cancelIdx] || '').toLowerCase().trim() === 'true' : false;
-
-      if(!email || !dateRaw) { skipped++; continue; }
-      if(canceled) { cancelled++; continue; }
-
-      const isoDate = dateRaw.includes('T') ? dateRaw : dateRaw.replace(' ', 'T') + ':00';
-      const dateObj = new Date(isoDate);
-      if(Number.isNaN(dateObj.getTime())) { skipped++; continue; }
-
-      reservationRows.push({
-        email,
-        nom: inviteeName || null,
-        date_cours: dateObj.toISOString(),
-        type_cours: eventType || null,
-        evenement: eventUuid || `${email}-${dateObj.toISOString()}-${eventType}`,
-        source: 'calendly'
-      });
-
+      if(row.length < Math.max(emailIdx,dateIdx)+1) continue;
+      const email   = (row[emailIdx]||'').replace(/^['"]|['"]$/g,'').toLowerCase().trim();
+      const dateRaw = (row[dateIdx]||'').replace(/^['"]|['"]$/g,'').trim();
+      const canceled = cancelIdx>=0 ? (row[cancelIdx]||'').toLowerCase().trim() : 'false';
+      if(!email||!dateRaw||canceled==='true') { skipped++; continue; }
+      const date = dateRaw.split(' ')[0].split('T')[0];
+      if(date.length !== 10 || date[4] !== '-' || date[7] !== '-') continue;
+      if(new Date(date) >= new Date()) continue;
       const eleve = eleveMap[email];
-      if(!eleve) { unmatched++; continue; }
-
-      const today = new Date();
-      today.setHours(0,0,0,0);
-      const courseDay = new Date(dateObj);
-      courseDay.setHours(0,0,0,0);
-      if(courseDay >= today) continue;
-
-      const dateOnly = dateObj.toISOString().slice(0, 10);
-      if(!pastDatesByEleve[eleve.id]) {
-        pastDatesByEleve[eleve.id] = { nom: eleve.nom, dates: new Set() };
-      }
-      pastDatesByEleve[eleve.id].dates.add(dateOnly);
+      if(!eleve) continue;
+      if(!byEleve[eleve.id]) byEleve[eleve.id] = {nom:eleve.nom, dates:new Set()};
+      byEleve[eleve.id].dates.add(date);
     }
 
-    let reservationsAdded = 0;
-    for(let b = 0; b < reservationRows.length; b += 200) {
-      const batch = reservationRows.slice(b, b + 200);
-      if(!batch.length) continue;
-      const { data: inserted, error } = await db
-        .from('reservations')
-        .upsert(batch, { onConflict: 'email,date_cours,evenement', ignoreDuplicates: true })
-        .select('id');
-      if(error) throw error;
-      reservationsAdded += (inserted || []).length;
-    }
-
-    let coursAdded = 0;
+    // Insert missing cours per eleve
+    let totalAdded = 0;
     const summary = [];
-    for(const [eleveId, info] of Object.entries(pastDatesByEleve)) {
-      const { data: existing, error: existingError } = await db.from('cours').select('date').eq('eleve_id', eleveId);
-      if(existingError) throw existingError;
-
-      const existingDates = new Set((existing || []).map(c => c.date));
-      const toInsert = [...info.dates].filter(d => !existingDates.has(d));
-
-      if(toInsert.length) {
-        for(let b = 0; b < toInsert.length; b += 50) {
-          const payload = toInsert.slice(b, b + 50).map(date => ({
-            eleve_id: eleveId,
-            date,
-            commentaire: 'Import Calendly'
-          }));
-          const { error: insertError } = await db.from('cours').insert(payload);
-          if(insertError) throw insertError;
+    for(const [eleveId, info] of Object.entries(byEleve)){
+      const { data: existing } = await db.from('cours').select('date').eq('eleve_id', eleveId);
+      const existingDates = new Set((existing||[]).map(c=>c.date));
+      const toInsert = [...info.dates].filter(d=>!existingDates.has(d));
+      if(toInsert.length>0){
+        // Insert in batches of 50
+        for(let b=0;b<toInsert.length;b+=50){
+          await db.from('cours').insert(toInsert.slice(b,b+50).map(date=>({eleve_id:eleveId,date,commentaire:'Import Calendly'})));
         }
-        coursAdded += toInsert.length;
+        totalAdded += toInsert.length;
       }
-
-      summary.push(`${info.nom} : +${toInsert.length} séance(s) historique(s)`);
+      summary.push(`${info.nom} : +${toInsert.length} ajoutée(s) / ${info.dates.size} dans le CSV`);
     }
 
-    result.innerHTML = [
-      `<strong>✓ Import terminé</strong>`,
-      `Historique sécurisé : <strong>${reservationsAdded}</strong> réservation(s) enregistrée(s) dans la mémoire permanente.`,
-      `Cours ajoutés au suivi élève : <strong>${coursAdded}</strong>.`,
-      cancelled ? `Annulations ignorées : <strong>${cancelled}</strong>.` : '',
-      unmatched ? `Emails non reliés à un élève : <strong>${unmatched}</strong>.` : '',
-      skipped ? `Lignes ignorées : <strong>${skipped}</strong>.` : '',
-      summary.length ? `<br>${summary.join('<br>')}` : ''
-    ].filter(Boolean).join('<br>');
-
-    toast(`Import CSV — ${reservationsAdded} réservation(s) mémorisée(s), ${coursAdded} séance(s) ajoutée(s).`);
+    result.innerHTML = `<strong>✓ Import terminé — ${totalAdded} séance(s) ajoutée(s)</strong><br><br>` + summary.join('<br>');
+    toast(`Import CSV — ${totalAdded} séances ajoutées.`);
     await loadEleves();
   } catch(err) {
-    result.innerHTML = '❌ Erreur : ' + (err.message || err);
+    result.innerHTML = '❌ Erreur : ' + err.message;
   }
 });
 
