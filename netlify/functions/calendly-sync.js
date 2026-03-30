@@ -4,52 +4,44 @@ async function get(url) {
   const res = await fetch(url, {
     headers: { Authorization: `Bearer ${CALENDLY_TOKEN}` }
   });
-  if (!res.ok) throw new Error(`Calendly ${res.status}: ${await res.text()}`);
+  if (!res.ok) throw new Error(`Calendly ${res.status}`);
   return res.json();
 }
 
-exports.handler = async (event) => {
-  const headers = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'Content-Type',
-    'Content-Type': 'application/json'
-  };
-
-  if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers, body: '' };
+export default async function handler(req, res) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  
+  if (req.method === 'OPTIONS') return res.status(200).end();
 
   try {
-    const { email } = JSON.parse(event.body || '{}');
+    const { email } = req.body;
     if (!email) throw new Error('Email manquant');
 
-    // Get organization URI
     const me = await get('https://api.calendly.com/users/me');
-    const orgUri = me.resource.current_organization;
-
-    // Search invitees by email across entire organization
+    const userUri = me.resource.uri;
     const now = new Date().toISOString();
+
     let matched = [];
-    let nextUrl = `https://api.calendly.com/scheduled_events/invitees?organization=${encodeURIComponent(orgUri)}&email=${encodeURIComponent(email)}&count=100`;
+    let nextUrl = `https://api.calendly.com/scheduled_events?user=${encodeURIComponent(userUri)}&status=active&max_start_time=${now}&count=100&sort=start_time:desc`;
 
     do {
       const data = await get(nextUrl);
-      for (const inv of (data.collection || [])) {
-        // Get the event details to check if it's in the past
-        const eventUri = inv.scheduled_event;
-        const evData = await get(eventUri);
-        const ev = evData.resource;
-        if (ev && new Date(ev.end_time) < new Date()) {
-          matched.push({
-            date: ev.start_time.split('T')[0],
-            name: ev.name || 'Séance'
-          });
-        }
+      const events = data.collection || [];
+      for (const ev of events) {
+        const uuid = ev.uri.split('/').pop();
+        try {
+          const inv = await get(`https://api.calendly.com/scheduled_events/${uuid}/invitees?count=100&email=${encodeURIComponent(email)}`);
+          if (inv.collection && inv.collection.length > 0) {
+            matched.push({ date: ev.start_time.split('T')[0], name: ev.name });
+          }
+        } catch(e) {}
       }
       nextUrl = data.pagination?.next_page || null;
     } while (nextUrl);
 
-    return { statusCode: 200, headers, body: JSON.stringify({ events: matched }) };
-
+    res.status(200).json({ events: matched });
   } catch (e) {
-    return { statusCode: 500, headers, body: JSON.stringify({ error: e.message }) };
+    res.status(500).json({ error: e.message });
   }
-};
+}
