@@ -5,9 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Self-Shao — Espace Élève</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">document.getElementById('btn-stu-book').addEventListener('click', openPremiumBooking);
-document.getElementById('btn-stu-programme').addEventListener('click', () => { toast("Programme premium à connecter ensuite.", 'ok'); });
-</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root {
   --black: #000000;
@@ -63,6 +61,28 @@ body{font-family:'DM Sans',sans-serif;background:var(--black);color:var(--text);
 
 /* STUDENT */
 #screen-student{padding:36px 24px 60px;max-width:860px;margin:0 auto;}
+
+.premium-banner{margin:18px 0 22px;padding:18px 20px;border:1px solid rgba(200,169,110,0.3);background:linear-gradient(180deg,rgba(200,169,110,0.10),rgba(200,169,110,0.04));}
+.premium-banner.hidden{display:none !important;}
+.premium-top{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;flex-wrap:wrap;}
+.premium-kicker{font-size:.72rem;letter-spacing:3px;color:var(--accent);text-transform:uppercase;margin-bottom:6px;}
+.premium-title{font-family:'Bebas Neue',sans-serif;font-size:1.9rem;letter-spacing:1px;color:var(--white);}
+.premium-sub{font-size:.88rem;color:var(--text2);max-width:640px;line-height:1.6;}
+.premium-pill{border:1px solid rgba(200,169,110,0.35);color:var(--accent);padding:8px 12px;font-size:.72rem;letter-spacing:2px;text-transform:uppercase;}
+.premium-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:14px;margin-top:16px;}
+.premium-card{background:rgba(255,255,255,0.02);border:1px solid var(--border);padding:16px;}
+.premium-card-title{font-size:.74rem;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:10px;}
+.premium-list{display:grid;gap:8px;}
+.premium-item{padding:10px 12px;background:var(--dark);border:1px solid var(--border);font-size:.86rem;color:var(--text);}
+.premium-actions{display:flex;flex-direction:column;gap:10px;}
+.premium-btn{display:inline-flex;align-items:center;justify-content:center;width:100%;padding:12px 16px;background:var(--accent);color:#111;text-decoration:none;font-weight:700;letter-spacing:1px;text-transform:uppercase;border:none;cursor:pointer;}
+.premium-btn.secondary{background:transparent;color:var(--accent);border:1px solid rgba(200,169,110,0.35);}
+.premium-note{font-size:.8rem;color:var(--text2);line-height:1.5;}
+.standard-note{margin:18px 0 8px;padding:14px 16px;border:1px solid var(--border);background:var(--panel);color:var(--text2);font-size:.85rem;}
+.standard-note.hidden{display:none !important;}
+.eleve-badge{display:inline-flex;align-items:center;padding:4px 8px;border:1px solid rgba(200,169,110,0.3);color:var(--accent);font-size:.68rem;letter-spacing:1.5px;text-transform:uppercase;}
+@media (max-width: 760px){.premium-grid{grid-template-columns:1fr;}}
+
 .dash-header{margin-bottom:40px;padding-bottom:24px;border-bottom:1px solid var(--border);}
 .dash-greeting{font-size:0.62rem;letter-spacing:0.25em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
 .dash-name{font-family:'Bebas Neue',sans-serif;font-size:clamp(1.6rem,6vw,2.4rem);letter-spacing:0.06em;color:var(--white);line-height:1;word-break:break-word;}
@@ -145,28 +165,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--black);color:var(--text);
 .modal-title{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:0.08em;color:var(--white);margin-bottom:24px;}
 .modal-err{color:#c05050;font-size:0.77rem;margin-top:8px;min-height:16px;}
 .modal-actions{display:flex;gap:10px;margin-top:20px;}
-
-.premium-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(200,169,110,0.12);border:1px solid rgba(200,169,110,0.35);padding:8px 12px;color:var(--accent);font-size:0.72rem;letter-spacing:0.16em;text-transform:uppercase;margin-top:14px;}
-.premium-panel{margin-top:28px;border:1px solid var(--border);background:linear-gradient(180deg,rgba(200,169,110,0.08),rgba(0,0,0,0.04));padding:22px;}
-.premium-panel.hidden{display:none;}
-.premium-title{font-size:0.72rem;letter-spacing:0.25em;text-transform:uppercase;color:var(--accent);margin-bottom:18px;display:flex;align-items:center;gap:12px;}
-.premium-title::after{content:'';flex:1;height:1px;background:var(--border);}
-.premium-grid{display:grid;grid-template-columns:1.2fr 1fr;gap:18px;}
-.premium-card{background:rgba(255,255,255,0.02);border:1px solid var(--border);padding:18px;}
-.premium-card h4{font-family:'Bebas Neue',sans-serif;letter-spacing:0.08em;font-size:1.15rem;color:var(--white);margin:0 0 10px;}
-.premium-card p{font-size:0.82rem;color:var(--text2);line-height:1.7;margin:0 0 14px;}
-.premium-actions{display:flex;gap:10px;flex-wrap:wrap;}
-.btn-premium{background:var(--accent);color:#120f0a;border:none;padding:12px 16px;cursor:pointer;font-family:'Bebas Neue',sans-serif;letter-spacing:0.12em;font-size:0.95rem;}
-.btn-premium.secondary{background:transparent;color:var(--white);border:1px solid var(--border);}
-.premium-kpi{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
-.premium-mini{border:1px solid var(--border);padding:14px;background:rgba(255,255,255,0.02);}
-.premium-mini-label{font-size:0.62rem;color:var(--muted);letter-spacing:0.18em;text-transform:uppercase;margin-bottom:8px;}
-.premium-mini-value{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:0.04em;color:var(--white);}
-.toggle-row{display:flex;align-items:center;gap:10px;margin-top:12px;}
-.toggle-row input[type="checkbox"]{width:16px;height:16px;accent-color:var(--accent);cursor:pointer;}
-.toggle-row label{font-size:0.78rem;color:var(--text);cursor:pointer;}
-@media (max-width: 760px){.premium-grid{grid-template-columns:1fr;}}
-
 
 /* TOAST */
 #toast{position:fixed;bottom:24px;right:24px;z-index:999;background:var(--panel2);border:1px solid var(--border2);padding:12px 20px;font-size:0.8rem;color:var(--text);transform:translateY(80px);opacity:0;transition:all 0.3s;pointer-events:none;}
@@ -271,6 +269,37 @@ body{font-family:'DM Sans',sans-serif;background:var(--black);color:var(--text);
         <div class="stat-label">Dernière séance</div>
       </div>
     </div>
+
+    <div id="stu-premium-banner" class="premium-banner hidden">
+      <div class="premium-top">
+        <div>
+          <div class="premium-kicker">Accès premium</div>
+          <div class="premium-title">Console premium active</div>
+          <div class="premium-sub">Cet espace regroupe ton programme personnel, la réservation de tes cours et les points travaillés sur tes prochaines séances.</div>
+        </div>
+        <div class="premium-pill">Premium</div>
+      </div>
+      <div class="premium-grid">
+        <div class="premium-card">
+          <div class="premium-card-title">Programme personnel</div>
+          <div class="premium-list" id="stu-program-list">
+            <div class="premium-item">Programme personnel bientôt visible ici.</div>
+            <div class="premium-item">Bloc réservé aux élèves premium.</div>
+          </div>
+        </div>
+        <div class="premium-card">
+          <div class="premium-card-title">Réservation</div>
+          <div class="premium-actions">
+            <a id="stu-book-link" class="premium-btn" href="https://calendly.com/contact-selfshao/cours-adultes" target="_blank" rel="noopener">Réserver un cours</a>
+            <button id="stu-book-refresh" class="premium-btn secondary" type="button">Actualiser mon espace</button>
+            <div class="premium-note">La réservation s’ouvre sur Calendly. Les données de progression et l’historique restent affichés juste en dessous.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="stu-standard-note" class="standard-note hidden">L’espace premium donne accès au programme personnel et à la réservation des cours.</div>
+
     <div class="section-title">Assiduité</div>
     <div class="assiduite-wrap">
       <div class="assiduite-header">
@@ -362,15 +391,13 @@ body{font-family:'DM Sans',sans-serif;background:var(--black);color:var(--text);
             <input type="date" class="edit-date" id="edit-date-niveau" style="width:100%;">
           </div>
         </div>
-        <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:14px;">
-          <div class="toggle-row" style="margin-top:0;">
-            <input type="checkbox" id="edit-premium">
-            <label for="edit-premium">Accès premium</label>
-          </div>
-          <div class="toggle-row" style="margin-top:0;">
-            <input type="checkbox" id="edit-referent" style="width:16px;height:16px;accent-color:var(--accent);cursor:pointer;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+          <input type="checkbox" id="edit-referent" style="width:16px;height:16px;accent-color:var(--accent);cursor:pointer;">
           <label for="edit-referent" style="font-size:0.78rem;color:var(--text);cursor:pointer;">Référent groupe</label>
-          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+          <input type="checkbox" id="edit-premium" style="width:16px;height:16px;accent-color:var(--accent);cursor:pointer;">
+          <label for="edit-premium" style="font-size:0.78rem;color:var(--text);cursor:pointer;">Accès premium</label>
         </div>
         <label class="f-label">Note privée (non visible par l'élève)</label>
         <textarea class="edit-textarea" id="edit-note-privee" placeholder="Observations personnelles, contexte, points de vigilance…" style="min-height:70px;border-color:var(--red);"></textarea>
@@ -429,9 +456,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--black);color:var(--text);
     <input class="f-input" type="text" id="new-id" placeholder="prenom.nom">
     <label class="f-label">Mot de passe</label>
     <input class="f-input" type="text" id="new-pw" placeholder="Mot de passe initial">
-    <div class="toggle-row">
-      <input type="checkbox" id="new-premium">
-      <label for="new-premium">Créer cet élève en premium</label>
+    <div style="display:flex;align-items:center;gap:10px;margin-top:8px;margin-bottom:6px;">
+      <input type="checkbox" id="new-premium" style="width:16px;height:16px;accent-color:var(--accent);cursor:pointer;">
+      <label for="new-premium" style="font-size:0.78rem;color:var(--text);cursor:pointer;">Accès premium</label>
     </div>
     <div class="modal-err" id="modal-err"></div>
     <div class="modal-actions">
@@ -450,7 +477,6 @@ const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const ADMIN_ID = 'alex-admin';
 const ADMIN_PW = 'selfshao2024';
-const CALENDLY_URL = 'https://calendly.com/contact-selfshao/cours-adultes';
 
 
 const AXES = [
@@ -478,7 +504,6 @@ function fmtDate(d){
   return new Date(d).toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'});
 }
 function today(){ return new Date().toISOString().split('T')[0]; }
-function openPremiumBooking(){ window.open(CALENDLY_URL, '_blank', 'noopener,noreferrer'); }
 
 // LOGIN
 document.getElementById('inp-pw').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
@@ -529,8 +554,8 @@ async function showStudent(){
   document.getElementById('screen-admin').classList.add('hidden');
   document.getElementById('stu-name').textContent = currentUser.nom.toUpperCase();
   // Force reload profile to get latest fields
-  const { data: freshProfile } = await db.from('eleves').select('titre,referent_groupe').eq('id', currentUser.id).single();
-  if(freshProfile) { currentUser.titre = freshProfile.titre; currentUser.referent_groupe = freshProfile.referent_groupe; }
+  const { data: freshProfile } = await db.from('eleves').select('titre,referent_groupe,premium').eq('id', currentUser.id).single();
+  if(freshProfile) { currentUser.titre = freshProfile.titre; currentUser.referent_groupe = freshProfile.referent_groupe; currentUser.premium = !!freshProfile.premium; }
   const titreEl = document.getElementById('stu-titre');
   const parts = [];
   if(currentUser.titre) parts.push(currentUser.titre);
@@ -541,10 +566,14 @@ async function showStudent(){
   } else {
     titreEl.style.display = 'none';
   }
+
+  const premiumBanner = document.getElementById('stu-premium-banner');
+  const standardNote = document.getElementById('stu-standard-note');
+  premiumBanner.classList.toggle('hidden', !currentUser.premium);
+  standardNote.classList.toggle('hidden', !!currentUser.premium);
+  document.getElementById('stu-book-link').href = 'https://calendly.com/contact-selfshao/cours-adultes';
+  document.getElementById('stu-book-refresh').onclick = () => showStudent();
   // Date will be set after loading cours
-  const isPremium = !!currentUser.premium;
-  document.getElementById('stu-premium-badge').classList.toggle('hidden', !isPremium);
-  document.getElementById('stu-premium-panel').classList.toggle('hidden', !isPremium);
 
   const { data: cours } = await db.from('cours').select('*').eq('eleve_id', currentUser.id).order('date', { ascending: false });
   document.getElementById('stu-cours-count').textContent = cours ? cours.length : 0;
@@ -590,6 +619,18 @@ async function showStudent(){
     cours.forEach(c => {
       hist.innerHTML += `<div class="history-item"><div class="history-dot"></div><div class="history-date">${fmtDate(c.date)}</div><div class="history-note">${c.commentaire || ''}</div></div>`;
     });
+  }
+
+  const programList = document.getElementById('stu-program-list');
+  if(currentUser.premium){
+    const recent = (cours || []).slice(0,3);
+    if(recent.length){
+      programList.innerHTML = recent.map(c => `<div class="premium-item"><strong>${fmtDate(c.date)}</strong><br>${c.commentaire || 'Séance enregistrée dans ton historique.'}</div>`).join('');
+    } else {
+      programList.innerHTML = '<div class="premium-item">Aucune séance enregistrée pour le moment.</div><div class="premium-item">Utilise le bouton de réservation pour programmer ton prochain cours.</div>';
+    }
+  } else {
+    programList.innerHTML = '<div class="premium-item">Réservé aux élèves premium.</div>';
   }
 
   const { data: prog } = await db.from('progression').select('*').eq('eleve_id', currentUser.id).single();
@@ -732,7 +773,7 @@ async function loadEleves(){
     row.innerHTML = `
       <div>
         <div class="eleve-nom">${el.nom}</div>
-        <div class="eleve-id">@${el.identifiant}${el.premium ? ' · PREMIUM' : ''}</div>
+        <div class="eleve-id">@${el.identifiant}</div>${el.premium ? '<div class="eleve-badge">Premium</div>' : ''}
       </div>
       <div style="display:flex;align-items:center;gap:16px;">
         <div class="eleve-cours-count">${count || 0} cours</div>
