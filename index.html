@@ -179,38 +179,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--black);color:var(--text);
 .bilan-commentaire{font-size:0.85rem;color:var(--text);line-height:1.65;font-style:italic;padding-top:12px;border-top:1px solid var(--border);}
 .edit-section-label{font-size:0.62rem;letter-spacing:0.22em;text-transform:uppercase;color:var(--accent);margin-bottom:14px;display:block;}
 
-
-/* PREMIUM INTEGRÉ */
-.premium-wrap{background:linear-gradient(180deg,rgba(200,169,110,0.08),rgba(200,169,110,0.02));border:1px solid rgba(200,169,110,0.35);padding:24px 24px 18px;margin-bottom:36px;position:relative;}
-.premium-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:18px;}
-.premium-kicker{font-size:0.62rem;letter-spacing:0.24em;text-transform:uppercase;color:var(--accent);margin-bottom:8px;}
-.premium-title{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:0.04em;color:var(--white);line-height:1;}
-.premium-badge{border:1px solid rgba(200,169,110,0.35);padding:10px 16px;font-size:0.82rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--accent);white-space:nowrap;}
-.premium-sub{font-size:0.95rem;color:var(--text);line-height:1.7;max-width:760px;}
-.premium-grid{display:grid;grid-template-columns:1.3fr 1fr;gap:16px;margin-top:18px;}
-.premium-card{background:rgba(0,0,0,0.22);border:1px solid var(--border);padding:18px;}
-.premium-card-title{font-size:0.7rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--accent);margin-bottom:14px;}
-.premium-empty{background:var(--dark);border:1px solid var(--border);padding:12px 14px;color:var(--white);margin-bottom:12px;}
-.premium-note{background:var(--dark);border:1px solid var(--border);padding:12px 14px;color:var(--white);min-height:72px;}
-.premium-btn{display:block;width:100%;background:var(--accent);color:#111;font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:0.12em;padding:16px 18px;border:none;cursor:pointer;transition:transform .15s,opacity .15s;text-transform:uppercase;}
-.premium-btn:hover{opacity:.92;}
-.premium-btn.secondary{margin-top:14px;background:transparent;border:1px solid rgba(200,169,110,0.35);color:var(--accent);}
-.premium-btn:active{transform:scale(.985);}
-.premium-small{font-size:0.88rem;color:var(--text2);line-height:1.7;margin-top:12px;}
-.premium-courses{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;}
-.premium-course{background:var(--dark);border:1px solid var(--border);padding:12px 14px;}
-.premium-course-day{font-size:0.62rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--accent);margin-bottom:4px;}
-.premium-course-title{font-size:0.95rem;color:var(--white);font-weight:600;margin-bottom:3px;}
-.premium-course-meta{font-size:0.8rem;color:var(--text2);}
-.premium-status{display:inline-flex;align-items:center;gap:8px;padding:5px 10px;background:rgba(200,169,110,0.12);border:1px solid rgba(200,169,110,0.18);font-size:0.64rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--accent);margin-top:10px;}
-.eleve-badges{display:flex;align-items:center;gap:8px;margin-top:4px;flex-wrap:wrap;}
-.eleve-badge{font-size:0.58rem;letter-spacing:0.18em;text-transform:uppercase;padding:3px 7px;border:1px solid var(--border2);color:var(--text2);}
-.eleve-badge.premium{border-color:rgba(200,169,110,0.35);color:var(--accent);background:rgba(200,169,110,0.08);}
-.inline-check{display:flex;align-items:center;gap:10px;margin-top:10px;}
-.inline-check input{width:16px;height:16px;accent-color:var(--accent);cursor:pointer;}
-.inline-check label{font-size:0.78rem;color:var(--text);cursor:pointer;}
-@media(max-width:640px){.premium-grid,.premium-courses{grid-template-columns:1fr;}.premium-head{flex-direction:column;align-items:flex-start;}.premium-title{font-size:1.55rem;}}
-
 @media(max-width:640px){
   .axes-grid,.axes-edit-grid,.stats-row{grid-template-columns:1fr;}
   .admin-header{flex-direction:column;align-items:flex-start;gap:14px;}
@@ -279,33 +247,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--black);color:var(--text);
         <div class="stat-label">Dernière séance</div>
       </div>
     </div>
-    
-    <div id="premium-section" class="premium-wrap hidden">
-      <div class="premium-head">
-        <div>
-          <div class="premium-kicker">Accès premium</div>
-          <div class="premium-title">Console premium active</div>
-          <div class="premium-sub">Cet espace regroupe ton programme personnel, la réservation de tes cours et les points travaillés sur tes prochaines séances.</div>
-        </div>
-        <div class="premium-badge">Premium</div>
-      </div>
-      <div class="premium-grid">
-        <div class="premium-card">
-          <div class="premium-card-title">Programme personnel</div>
-          <div class="premium-empty" id="premium-program-status">Aucune séance enregistrée pour le moment.</div>
-          <div class="premium-note" id="premium-program-note">Utilise le bouton de réservation pour programmer ton prochain cours.</div>
-          <div id="premium-courses" class="premium-courses hidden"></div>
-        </div>
-        <div class="premium-card">
-          <div class="premium-card-title">Réservation</div>
-          <button class="premium-btn" id="btn-premium-book">Réserver un cours</button>
-          <button class="premium-btn secondary" id="btn-premium-refresh">Actualiser mon espace</button>
-          <div class="premium-small">La réservation s’ouvre sur Calendly. Les données de progression et l’historique restent affichés juste en dessous.</div>
-          <div class="premium-status"><span>●</span><span id="premium-status-text">Accès premium actif</span></div>
-        </div>
-      </div>
-    </div>
-
     <div class="section-title">Assiduité</div>
     <div class="assiduite-wrap">
       <div class="assiduite-header">
@@ -401,10 +342,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--black);color:var(--text);
           <input type="checkbox" id="edit-referent" style="width:16px;height:16px;accent-color:var(--accent);cursor:pointer;">
           <label for="edit-referent" style="font-size:0.78rem;color:var(--text);cursor:pointer;">Référent groupe</label>
         </div>
-        <div class="inline-check" style="margin-bottom:14px;">
-          <input type="checkbox" id="edit-premium">
-          <label for="edit-premium">Accès premium</label>
-        </div>
         <label class="f-label">Note privée (non visible par l'élève)</label>
         <textarea class="edit-textarea" id="edit-note-privee" placeholder="Observations personnelles, contexte, points de vigilance…" style="min-height:70px;border-color:var(--red);"></textarea>
       </div>
@@ -462,10 +399,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--black);color:var(--text);
     <input class="f-input" type="text" id="new-id" placeholder="prenom.nom">
     <label class="f-label">Mot de passe</label>
     <input class="f-input" type="text" id="new-pw" placeholder="Mot de passe initial">
-    <div class="inline-check">
-      <input type="checkbox" id="new-premium">
-      <label for="new-premium">Accès premium</label>
-    </div>
     <div class="modal-err" id="modal-err"></div>
     <div class="modal-actions">
       <button class="btn-save" id="btn-create-eleve">Créer</button>
@@ -560,8 +493,8 @@ async function showStudent(){
   document.getElementById('screen-admin').classList.add('hidden');
   document.getElementById('stu-name').textContent = currentUser.nom.toUpperCase();
   // Force reload profile to get latest fields
-  const { data: freshProfile } = await db.from('eleves').select('titre,referent_groupe,premium,note_privee').eq('id', currentUser.id).single();
-  if(freshProfile) { currentUser = { ...currentUser, ...freshProfile }; }
+  const { data: freshProfile } = await db.from('eleves').select('titre,referent_groupe').eq('id', currentUser.id).single();
+  if(freshProfile) { currentUser.titre = freshProfile.titre; currentUser.referent_groupe = freshProfile.referent_groupe; }
   const titreEl = document.getElementById('stu-titre');
   const parts = [];
   if(currentUser.titre) parts.push(currentUser.titre);
@@ -647,61 +580,12 @@ async function showStudent(){
     bilanComEl.textContent = '';
   }
 
-
-  await renderPremiumSection();
   window.scrollTo({top:0, behavior:'instant'});
   const comEl = document.getElementById('stu-comment');
   comEl.innerHTML = (eleve && eleve.commentaire)
     ? `<span style="font-style:italic">${eleve.commentaire}</span>`
     : '<span class="comment-empty">Aucun commentaire pour le moment.</span>';
 }
-
-async function renderPremiumSection(){
-  const section = document.getElementById('premium-section');
-  if(!currentUser || !currentUser.premium){
-    section.classList.add('hidden');
-    return;
-  }
-  section.classList.remove('hidden');
-
-  const statusEl = document.getElementById('premium-status-text');
-  const progStatus = document.getElementById('premium-program-status');
-  const progNote = document.getElementById('premium-program-note');
-  const coursesWrap = document.getElementById('premium-courses');
-  coursesWrap.innerHTML = '';
-  coursesWrap.classList.add('hidden');
-
-  const { data: scheduleData } = await db.from('cours').select('jour,heure,duree,titre,type').order('jour').order('heure');
-  const hasSchedule = Array.isArray(scheduleData) && scheduleData.length && scheduleData[0].jour !== undefined;
-
-  if(hasSchedule){
-    progStatus.textContent = 'Créneaux premium disponibles cette semaine';
-    progNote.textContent = 'Réserve ton cours puis utilise l’espace admin pour affiner le travail du moment.';
-    coursesWrap.classList.remove('hidden');
-    const dayOrder = {lundi:1,mardi:2,mercredi:3,jeudi:4,vendredi:5,samedi:6,dimanche:7};
-    scheduleData
-      .slice()
-      .sort((a,b)=> (dayOrder[(a.jour||'').toLowerCase()]||99) - (dayOrder[(b.jour||'').toLowerCase()]||99) || String(a.heure||'').localeCompare(String(b.heure||'')))
-      .slice(0,6)
-      .forEach(c => {
-        const typeTxt = c.type === 'group' ? 'Collectif' : (c.type || 'Cours');
-        coursesWrap.innerHTML += `<div class="premium-course"><div class="premium-course-day">${c.jour || 'Séance'}</div><div class="premium-course-title">${c.titre || 'Cours Self-Shao'}</div><div class="premium-course-meta">${c.heure || 'Horaire à définir'} · ${c.duree || 60} min · ${typeTxt}</div></div>`;
-      });
-  } else {
-    progStatus.textContent = 'Accès premium actif';
-    progStatus.textContent = 'Accès premium actif';
-    progNote.textContent = currentUser.note_privee ? currentUser.note_privee : 'Programme personnel à définir depuis le back-office.';
-  }
-}
-
-function openPremiumCalendly(){
-  window.open('https://calendly.com/contact-selfshao/cours-adultes', '_blank');
-}
-
-document.addEventListener('click', (e) => {
-  if(e.target && e.target.id === 'btn-premium-book') openPremiumCalendly();
-  if(e.target && e.target.id === 'btn-premium-refresh') showStudent();
-});
 
 function buildAxesGrid(prog){
   const grid = document.getElementById('stu-axes-grid');
@@ -797,7 +681,7 @@ async function showAdmin(){
 }
 
 async function loadEleves(){
-  const { data } = await db.from('eleves').select('id,nom,identifiant,date_inscription,premium').order('nom');
+  const { data } = await db.from('eleves').select('id,nom,identifiant,date_inscription').order('nom');
   const eleves = data || [];
   const list = document.getElementById('admin-eleve-list');
   list.innerHTML = '';
@@ -809,7 +693,7 @@ async function loadEleves(){
     row.innerHTML = `
       <div>
         <div class="eleve-nom">${el.nom}</div>
-        <div class="eleve-id">@${el.identifiant}</div><div class="eleve-badges">${el.premium ? '<span class="eleve-badge premium">Premium</span>' : '<span class="eleve-badge">Standard</span>'}</div>
+        <div class="eleve-id">@${el.identifiant}</div>
       </div>
       <div style="display:flex;align-items:center;gap:16px;">
         <div class="eleve-cours-count">${count || 0} cours</div>
@@ -888,7 +772,6 @@ async function openEdit(id, nom){
   document.getElementById('edit-date-niveau').value = (eleve && eleve.date_niveau) || '';
   document.getElementById('edit-note-privee').value = (eleve && eleve.note_privee) || '';
   document.getElementById('edit-referent').checked = (eleve && eleve.referent_groupe) || false;
-  document.getElementById('edit-premium').checked = (eleve && eleve.premium) || false;
   document.getElementById('sync-msg').textContent = '';
   document.getElementById('admin-edit').scrollIntoView({ behavior: 'smooth', block: 'start' });
   await loadEleves();
@@ -933,7 +816,6 @@ document.getElementById('btn-save-edit').addEventListener('click', async () => {
   updateData.date_niveau = dateNiveauVal || null;
   updateData.note_privee = notePriveeVal || null;
   updateData.referent_groupe = document.getElementById('edit-referent').checked;
-  updateData.premium = document.getElementById('edit-premium').checked;
   await db.from('eleves').update(updateData).eq('id', selectedEleveId);
 
   // Save bilan hebdo
@@ -993,32 +875,42 @@ document.getElementById('input-csv').addEventListener('change', async (e) => {
   result.textContent = 'Lecture du fichier en cours…';
 
   try {
-    // Robust file reading
     const text = await new Promise((resolve, reject) => {
       const reader = new FileReader();
-      reader.onload = e => resolve(e.target.result);
+      reader.onload = ev => resolve(ev.target.result);
       reader.onerror = () => reject(new Error('Fichier illisible'));
       reader.readAsText(file, 'UTF-8');
     });
 
     if(!text || text.length < 10) throw new Error('Fichier vide ou illisible');
 
-    // Robust CSV parser - handles quoted fields with commas inside
     function parseCSV(str) {
       const rows = [];
-      const lines = str.split('\n').map(function(l){return l[l.length-1]==='\r'?l.slice(0,-1):l;});
-      for(const line of lines) {
-        if(!line.trim()) continue;
-        const row = [];
-        let inQuotes = false, cur = '';
-        for(let i=0;i<line.length;i++){
-          const ch = line[i];
-          if(ch==='"'){ inQuotes=!inQuotes; }
-          else if(ch===','&&!inQuotes){ row.push(cur.trim()); cur=''; }
-          else { cur+=ch; }
+      let row = [];
+      let cur = '';
+      let inQuotes = false;
+      for (let i = 0; i < str.length; i++) {
+        const ch = str[i];
+        const next = str[i + 1];
+        if (ch === '"') {
+          if (inQuotes && next === '"') { cur += '"'; i++; }
+          else { inQuotes = !inQuotes; }
+        } else if (ch === ',' && !inQuotes) {
+          row.push(cur);
+          cur = '';
+        } else if ((ch === '\n' || ch === '\r') && !inQuotes) {
+          if (ch === '\r' && next === '\n') i++;
+          row.push(cur);
+          if (row.some(cell => String(cell).trim() !== '')) rows.push(row.map(v => String(v).trim()));
+          row = [];
+          cur = '';
+        } else {
+          cur += ch;
         }
-        row.push(cur.trim());
-        rows.push(row);
+      }
+      if (cur.length || row.length) {
+        row.push(cur);
+        if (row.some(cell => String(cell).trim() !== '')) rows.push(row.map(v => String(v).trim()));
       }
       return rows;
     }
@@ -1027,60 +919,127 @@ document.getElementById('input-csv').addEventListener('change', async (e) => {
     if(rows.length < 2) throw new Error('CSV trop court');
 
     const headers = rows[0].map(h => h.replace(/^"|"$/g,'').toLowerCase().trim());
-    const emailIdx  = headers.findIndex(h => h.includes('invitee email'));
-    const dateIdx   = headers.findIndex(h => h.includes('start date'));
+    const findIndex = (label) => headers.findIndex(h => h.includes(label));
+
+    const inviteeNameIdx = findIndex('invitee name');
+    const emailIdx = findIndex('invitee email');
+    const eventTypeIdx = findIndex('event type name');
+    const dateIdx = findIndex('start date');
     const cancelIdx = headers.findIndex(h => h === 'canceled');
+    const eventUuidIdx = findIndex('event uuid');
 
-    if(emailIdx===-1||dateIdx===-1) throw new Error("Format CSV non reconnu — export Calendly attendu");
+    if(emailIdx === -1 || dateIdx === -1) {
+      throw new Error('Format CSV non reconnu — export Calendly attendu');
+    }
 
-    result.textContent = `Analyse de ${rows.length-1} lignes…`;
+    result.textContent = `Analyse de ${rows.length - 1} lignes…`;
 
-    // Load all eleves with email
-    const { data: eleves } = await db.from('eleves').select('id,email,nom');
+    const { data: eleves, error: elevesError } = await db.from('eleves').select('id,email,nom');
+    if(elevesError) throw elevesError;
+
     const eleveMap = {};
-    (eleves||[]).forEach(el => { if(el.email) eleveMap[el.email.toLowerCase().trim()] = el; });
+    (eleves || []).forEach(el => {
+      if(el.email) eleveMap[String(el.email).toLowerCase().trim()] = el;
+    });
 
-    // Group dates by eleve
-    const byEleve = {};
+    const reservationRows = [];
+    const pastDatesByEleve = {};
     let skipped = 0;
-    for(let i=1;i<rows.length;i++){
+    let unmatched = 0;
+    let cancelled = 0;
+
+    for(let i = 1; i < rows.length; i++) {
       const row = rows[i];
-      if(row.length < Math.max(emailIdx,dateIdx)+1) continue;
-      const email   = (row[emailIdx]||'').replace(/^['"]|['"]$/g,'').toLowerCase().trim();
-      const dateRaw = (row[dateIdx]||'').replace(/^['"]|['"]$/g,'').trim();
-      const canceled = cancelIdx>=0 ? (row[cancelIdx]||'').toLowerCase().trim() : 'false';
-      if(!email||!dateRaw||canceled==='true') { skipped++; continue; }
-      const date = dateRaw.split(' ')[0].split('T')[0];
-      if(date.length !== 10 || date[4] !== '-' || date[7] !== '-') continue;
-      if(new Date(date) >= new Date()) continue;
+      const email = String(row[emailIdx] || '').replace(/^['"]|['"]$/g,'').toLowerCase().trim();
+      const inviteeName = inviteeNameIdx >= 0 ? String(row[inviteeNameIdx] || '').replace(/^['"]|['"]$/g,'').trim() : '';
+      const eventType = eventTypeIdx >= 0 ? String(row[eventTypeIdx] || '').replace(/^['"]|['"]$/g,'').trim() : 'Cours';
+      const eventUuid = eventUuidIdx >= 0 ? String(row[eventUuidIdx] || '').replace(/^['"]|['"]$/g,'').trim() : '';
+      const dateRaw = String(row[dateIdx] || '').replace(/^['"]|['"]$/g,'').trim();
+      const canceled = cancelIdx >= 0 ? String(row[cancelIdx] || '').toLowerCase().trim() === 'true' : false;
+
+      if(!email || !dateRaw) { skipped++; continue; }
+      if(canceled) { cancelled++; continue; }
+
+      const isoDate = dateRaw.includes('T') ? dateRaw : dateRaw.replace(' ', 'T') + ':00';
+      const dateObj = new Date(isoDate);
+      if(Number.isNaN(dateObj.getTime())) { skipped++; continue; }
+
+      reservationRows.push({
+        email,
+        nom: inviteeName || null,
+        date_cours: dateObj.toISOString(),
+        type_cours: eventType || null,
+        evenement: eventUuid || `${email}-${dateObj.toISOString()}-${eventType}`,
+        source: 'calendly'
+      });
+
       const eleve = eleveMap[email];
-      if(!eleve) continue;
-      if(!byEleve[eleve.id]) byEleve[eleve.id] = {nom:eleve.nom, dates:new Set()};
-      byEleve[eleve.id].dates.add(date);
-    }
+      if(!eleve) { unmatched++; continue; }
 
-    // Insert missing cours per eleve
-    let totalAdded = 0;
-    const summary = [];
-    for(const [eleveId, info] of Object.entries(byEleve)){
-      const { data: existing } = await db.from('cours').select('date').eq('eleve_id', eleveId);
-      const existingDates = new Set((existing||[]).map(c=>c.date));
-      const toInsert = [...info.dates].filter(d=>!existingDates.has(d));
-      if(toInsert.length>0){
-        // Insert in batches of 50
-        for(let b=0;b<toInsert.length;b+=50){
-          await db.from('cours').insert(toInsert.slice(b,b+50).map(date=>({eleve_id:eleveId,date,commentaire:'Import Calendly'})));
-        }
-        totalAdded += toInsert.length;
+      const today = new Date();
+      today.setHours(0,0,0,0);
+      const courseDay = new Date(dateObj);
+      courseDay.setHours(0,0,0,0);
+      if(courseDay >= today) continue;
+
+      const dateOnly = dateObj.toISOString().slice(0, 10);
+      if(!pastDatesByEleve[eleve.id]) {
+        pastDatesByEleve[eleve.id] = { nom: eleve.nom, dates: new Set() };
       }
-      summary.push(`${info.nom} : +${toInsert.length} ajoutée(s) / ${info.dates.size} dans le CSV`);
+      pastDatesByEleve[eleve.id].dates.add(dateOnly);
     }
 
-    result.innerHTML = `<strong>✓ Import terminé — ${totalAdded} séance(s) ajoutée(s)</strong><br><br>` + summary.join('<br>');
-    toast(`Import CSV — ${totalAdded} séances ajoutées.`);
+    let reservationsAdded = 0;
+    for(let b = 0; b < reservationRows.length; b += 200) {
+      const batch = reservationRows.slice(b, b + 200);
+      if(!batch.length) continue;
+      const { data: inserted, error } = await db
+        .from('reservations')
+        .upsert(batch, { onConflict: 'email,date_cours,evenement', ignoreDuplicates: true })
+        .select('id');
+      if(error) throw error;
+      reservationsAdded += (inserted || []).length;
+    }
+
+    let coursAdded = 0;
+    const summary = [];
+    for(const [eleveId, info] of Object.entries(pastDatesByEleve)) {
+      const { data: existing, error: existingError } = await db.from('cours').select('date').eq('eleve_id', eleveId);
+      if(existingError) throw existingError;
+
+      const existingDates = new Set((existing || []).map(c => c.date));
+      const toInsert = [...info.dates].filter(d => !existingDates.has(d));
+
+      if(toInsert.length) {
+        for(let b = 0; b < toInsert.length; b += 50) {
+          const payload = toInsert.slice(b, b + 50).map(date => ({
+            eleve_id: eleveId,
+            date,
+            commentaire: 'Import Calendly'
+          }));
+          const { error: insertError } = await db.from('cours').insert(payload);
+          if(insertError) throw insertError;
+        }
+        coursAdded += toInsert.length;
+      }
+
+      summary.push(`${info.nom} : +${toInsert.length} séance(s) historique(s)`);
+    }
+
+    result.innerHTML = [
+      `<strong>✓ Import terminé</strong>`,
+      `Historique sécurisé : <strong>${reservationsAdded}</strong> réservation(s) enregistrée(s) dans la mémoire permanente.`,
+      `Cours ajoutés au suivi élève : <strong>${coursAdded}</strong>.`,
+      cancelled ? `Annulations ignorées : <strong>${cancelled}</strong>.` : '',
+      unmatched ? `Emails non reliés à un élève : <strong>${unmatched}</strong>.` : '',
+      skipped ? `Lignes ignorées : <strong>${skipped}</strong>.` : '',
+      summary.length ? `<br>${summary.join('<br>')}` : ''
+    ].filter(Boolean).join('<br>');
+
+    toast(`Import CSV — ${reservationsAdded} réservation(s) mémorisée(s), ${coursAdded} séance(s) ajoutée(s).`);
     await loadEleves();
   } catch(err) {
-    result.innerHTML = '❌ Erreur : ' + err.message;
+    result.innerHTML = '❌ Erreur : ' + (err.message || err);
   }
 });
 
@@ -1140,8 +1099,7 @@ document.addEventListener('click', e => {
 
 // MODAL
 document.getElementById('btn-new-eleve').addEventListener('click', () => {
-  ['new-nom','new-id','new-pw','new-email'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('new-premium').checked = false;
+  ['new-nom','new-id','new-pw'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('modal-err').textContent = '';
   document.getElementById('modal-overlay').classList.remove('hidden');
 });
@@ -1159,8 +1117,7 @@ document.getElementById('btn-create-eleve').addEventListener('click', async () =
   const err = document.getElementById('modal-err');
   if(!nom || !id || !pw){ err.textContent = 'Tous les champs sont obligatoires.'; return; }
   const email = document.getElementById('new-email').value.trim();
-  const premium = document.getElementById('new-premium').checked;
-  const { error } = await db.from('eleves').insert({ nom, identifiant: id, mot_de_passe: pw, email: email || null, premium, date_inscription: today() });
+  const { error } = await db.from('eleves').insert({ nom, identifiant: id, mot_de_passe: pw, email: email || null, date_inscription: today() });
   if(error){ err.textContent = 'Identifiant déjà utilisé ou erreur.'; return; }
   document.getElementById('modal-overlay').classList.add('hidden');
   toast('Élève créé avec succès.');
