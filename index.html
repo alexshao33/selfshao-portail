@@ -179,6 +179,43 @@ body{font-family:'DM Sans',sans-serif;background:var(--black);color:var(--text);
 .bilan-commentaire{font-size:0.85rem;color:var(--text);line-height:1.65;font-style:italic;padding-top:12px;border-top:1px solid var(--border);}
 .edit-section-label{font-size:0.62rem;letter-spacing:0.22em;text-transform:uppercase;color:var(--accent);margin-bottom:14px;display:block;}
 
+
+/* PREMIUM INTEGRE */
+.premium-shell{display:none;margin:10px 0 36px;}
+.premium-shell.active{display:block;}
+.premium-banner{background:linear-gradient(135deg,rgba(200,169,110,0.18),rgba(139,26,26,0.12));border:1px solid rgba(200,169,110,0.35);padding:20px 22px;margin-bottom:18px;position:relative;overflow:hidden;}
+.premium-banner::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--red));}
+.premium-kicker{font-size:0.62rem;letter-spacing:0.22em;text-transform:uppercase;color:var(--accent);margin-bottom:8px;}
+.premium-title{font-family:'Bebas Neue',sans-serif;font-size:1.65rem;letter-spacing:0.06em;color:var(--white);line-height:1;}
+.premium-sub{font-size:0.84rem;color:var(--text2);margin-top:8px;line-height:1.6;}
+.premium-grid{display:grid;grid-template-columns:1.15fr 0.85fr;gap:14px;}
+.premium-card{background:var(--panel);border:1px solid var(--border);padding:20px 22px;position:relative;overflow:hidden;}
+.premium-card::after{content:'';position:absolute;top:0;left:0;bottom:0;width:2px;background:var(--accent);}
+.premium-card-title{font-size:0.62rem;letter-spacing:0.22em;text-transform:uppercase;color:var(--accent);margin-bottom:14px;}
+.premium-list{display:flex;flex-wrap:wrap;gap:8px;}
+.premium-pill{font-size:0.68rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--white);background:var(--dark);border:1px solid var(--border2);padding:8px 10px;}
+.premium-cta{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px;}
+.btn-premium{background:var(--accent);color:#111;font-family:'Bebas Neue',sans-serif;font-size:0.95rem;letter-spacing:0.14em;padding:11px 18px;border:none;cursor:pointer;transition:transform .15s,opacity .15s;}
+.btn-premium:hover{opacity:.92;transform:translateY(-1px);}
+.btn-premium.secondary{background:none;color:var(--accent);border:1px solid var(--accent);}
+.premium-note{font-size:0.78rem;color:var(--muted);margin-top:10px;line-height:1.6;}
+.premium-program-list{display:flex;flex-direction:column;gap:8px;}
+.premium-program-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);}
+.premium-program-item:last-child{border-bottom:none;padding-bottom:0;}
+.premium-program-dot{width:7px;height:7px;border-radius:50%;background:var(--accent);margin-top:7px;flex-shrink:0;}
+.premium-program-text{font-size:0.84rem;color:var(--text);line-height:1.55;}
+.premium-lock{font-size:0.74rem;color:var(--accent);letter-spacing:0.16em;text-transform:uppercase;margin-top:8px;}
+.badge-premium{display:inline-flex;align-items:center;padding:4px 9px;border:1px solid rgba(200,169,110,0.4);background:rgba(200,169,110,0.1);color:var(--accent);font-size:0.6rem;letter-spacing:0.18em;text-transform:uppercase;}
+.badge-standard{display:inline-flex;align-items:center;padding:4px 9px;border:1px solid var(--border2);background:var(--dark);color:var(--muted);font-size:0.6rem;letter-spacing:0.18em;text-transform:uppercase;}
+#calendly-modal{position:fixed;inset:0;z-index:800;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.84);padding:18px;}
+#calendly-modal.active{display:flex;}
+.calendly-box{width:min(1000px,96vw);height:min(780px,88vh);background:#0b0b0b;border:1px solid var(--border2);position:relative;box-shadow:0 20px 70px rgba(0,0,0,.55);}
+.calendly-head{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border);background:var(--panel);}
+.calendly-head-title{font-size:0.68rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--accent);}
+.calendly-close{background:none;border:1px solid var(--border2);color:var(--text);padding:6px 10px;cursor:pointer;font-size:0.7rem;letter-spacing:0.14em;text-transform:uppercase;}
+.calendly-close:hover{border-color:var(--accent);color:var(--accent);}
+#calendly-frame{width:100%;height:calc(100% - 52px);border:none;background:#111;}
+
 @media(max-width:640px){
   .axes-grid,.axes-edit-grid,.stats-row{grid-template-columns:1fr;}
   .admin-header{flex-direction:column;align-items:flex-start;gap:14px;}
@@ -192,6 +229,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--black);color:var(--text);
   .radar-wrap{padding:8px 4px;}
   .nav-right{gap:8px;}
   .btn-logout{padding:4px 8px;font-size:0.58rem;}
+  .premium-grid{grid-template-columns:1fr;}
+  .premium-title{font-size:1.35rem;}
 }
 </style>
 </head>
@@ -281,6 +320,38 @@ body{font-family:'DM Sans',sans-serif;background:var(--black);color:var(--text);
       <div class="comment-from">Alex Shao — Self-Shao</div>
       <div id="stu-comment"><span class="comment-empty">Aucun commentaire pour le moment.</span></div>
     </div>
+    
+    <div id="premium-shell" class="premium-shell">
+      <div class="premium-banner">
+        <div class="premium-kicker">Accès premium actif</div>
+        <div class="premium-title">Console premium Self-Shao</div>
+        <div class="premium-sub">Tu retrouves ici ton espace avancé : réservation de cours, logique de programme personnel, suivi premium et accès rapide à ton travail prioritaire.</div>
+      </div>
+      <div class="premium-grid">
+        <div class="premium-card">
+          <div class="premium-card-title">Réserver & cours premium</div>
+          <div class="premium-list" id="premium-focus-pills">
+            <span class="premium-pill">Réservation des cours</span>
+            <span class="premium-pill">Programme personnel</span>
+            <span class="premium-pill">Suivi avancé</span>
+          </div>
+          <div class="premium-cta">
+            <button class="btn-premium" id="btn-open-calendly">Réserver un cours</button>
+            <button class="btn-premium secondary" id="btn-scroll-program">Voir mon programme</button>
+          </div>
+          <div class="premium-note">Ton accès premium est actif. La réservation ouvre Calendly dans une fenêtre intégrée au portail.</div>
+        </div>
+        <div class="premium-card" id="premium-program-anchor">
+          <div class="premium-card-title">Programme personnel</div>
+          <div class="premium-program-list" id="premium-program-list">
+            <div class="premium-program-item"><div class="premium-program-dot"></div><div class="premium-program-text">Programme en cours de préparation.</div></div>
+            <div class="premium-program-item"><div class="premium-program-dot"></div><div class="premium-program-text">Les axes de travail seront alimentés ici à partir de ton profil et de ta progression.</div></div>
+          </div>
+          <div class="premium-lock">Espace premium intégré</div>
+        </div>
+      </div>
+    </div>
+
     <div class="section-title">Historique des séances</div>
     <div class="history-list" id="stu-history"></div>
   </div>
@@ -338,9 +409,15 @@ body{font-family:'DM Sans',sans-serif;background:var(--black);color:var(--text);
             <input type="date" class="edit-date" id="edit-date-niveau" style="width:100%;">
           </div>
         </div>
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
-          <input type="checkbox" id="edit-referent" style="width:16px;height:16px;accent-color:var(--accent);cursor:pointer;">
-          <label for="edit-referent" style="font-size:0.78rem;color:var(--text);cursor:pointer;">Référent groupe</label>
+        <div style="display:flex;align-items:center;gap:18px;margin-bottom:14px;flex-wrap:wrap;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <input type="checkbox" id="edit-referent" style="width:16px;height:16px;accent-color:var(--accent);cursor:pointer;">
+            <label for="edit-referent" style="font-size:0.78rem;color:var(--text);cursor:pointer;">Référent groupe</label>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <input type="checkbox" id="edit-premium" style="width:16px;height:16px;accent-color:var(--accent);cursor:pointer;">
+            <label for="edit-premium" style="font-size:0.78rem;color:var(--text);cursor:pointer;">Accès premium</label>
+          </div>
         </div>
         <label class="f-label">Note privée (non visible par l'élève)</label>
         <textarea class="edit-textarea" id="edit-note-privee" placeholder="Observations personnelles, contexte, points de vigilance…" style="min-height:70px;border-color:var(--red);"></textarea>
@@ -399,11 +476,26 @@ body{font-family:'DM Sans',sans-serif;background:var(--black);color:var(--text);
     <input class="f-input" type="text" id="new-id" placeholder="prenom.nom">
     <label class="f-label">Mot de passe</label>
     <input class="f-input" type="text" id="new-pw" placeholder="Mot de passe initial">
+    <div style="display:flex;align-items:center;gap:10px;margin:-4px 0 12px;">
+      <input type="checkbox" id="new-premium" style="width:16px;height:16px;accent-color:var(--accent);cursor:pointer;">
+      <label for="new-premium" style="font-size:0.78rem;color:var(--text);cursor:pointer;">Accès premium</label>
+    </div>
     <div class="modal-err" id="modal-err"></div>
     <div class="modal-actions">
       <button class="btn-save" id="btn-create-eleve">Créer</button>
       <button class="btn-cancel" id="btn-cancel-modal">Annuler</button>
     </div>
+  </div>
+</div>
+
+
+<div id="calendly-modal">
+  <div class="calendly-box">
+    <div class="calendly-head">
+      <div class="calendly-head-title">Réservation Self-Shao</div>
+      <button class="calendly-close" id="btn-close-calendly">Fermer</button>
+    </div>
+    <iframe id="calendly-frame" src="about:blank" loading="lazy"></iframe>
   </div>
 </div>
 
@@ -493,8 +585,8 @@ async function showStudent(){
   document.getElementById('screen-admin').classList.add('hidden');
   document.getElementById('stu-name').textContent = currentUser.nom.toUpperCase();
   // Force reload profile to get latest fields
-  const { data: freshProfile } = await db.from('eleves').select('titre,referent_groupe').eq('id', currentUser.id).single();
-  if(freshProfile) { currentUser.titre = freshProfile.titre; currentUser.referent_groupe = freshProfile.referent_groupe; }
+  const { data: freshProfile } = await db.from('eleves').select('titre,referent_groupe,premium').eq('id', currentUser.id).single();
+  if(freshProfile) { currentUser.titre = freshProfile.titre; currentUser.referent_groupe = freshProfile.referent_groupe; currentUser.premium = !!freshProfile.premium; }
   const titreEl = document.getElementById('stu-titre');
   const parts = [];
   if(currentUser.titre) parts.push(currentUser.titre);
@@ -579,6 +671,8 @@ async function showStudent(){
     bilanAxesEl.innerHTML = '';
     bilanComEl.textContent = '';
   }
+
+  renderPremiumZone(prog, cours || []);
 
   window.scrollTo({top:0, behavior:'instant'});
   const comEl = document.getElementById('stu-comment');
@@ -672,6 +766,70 @@ function drawRadar(prog){
   svg.innerHTML = html;
 }
 
+
+function renderPremiumZone(prog, cours){
+  const shell = document.getElementById('premium-shell');
+  if(!shell) return;
+  if(!currentUser || !currentUser.premium){
+    shell.classList.remove('active');
+    return;
+  }
+  shell.classList.add('active');
+
+  const focus = [];
+  if(prog){
+    const sorted = AXES.map(ax => ({ label: ax.label, value: Number(prog[ax.key] || 0) })).sort((a,b) => a.value - b.value);
+    sorted.slice(0,3).forEach(item => focus.push(item.label));
+  }
+  if(!focus.length) focus.push('Technique & précision','Gestion du stress','Adaptabilité & improvisation');
+
+  const focusEl = document.getElementById('premium-focus-pills');
+  focusEl.innerHTML = focus.map(label => `<span class="premium-pill">${label}</span>`).join('');
+
+  const programEl = document.getElementById('premium-program-list');
+  const nbCours = cours ? cours.length : 0;
+  const lastDate = nbCours ? fmtDate(cours[0].date) : 'Aucune séance enregistrée';
+  programEl.innerHTML = `
+    <div class="premium-program-item"><div class="premium-program-dot"></div><div class="premium-program-text"><strong>Priorité actuelle :</strong> renforcer ${focus[0]} et consolider ${focus[1]}.</div></div>
+    <div class="premium-program-item"><div class="premium-program-dot"></div><div class="premium-program-text"><strong>Dernière séance connue :</strong> ${lastDate}.</div></div>
+    <div class="premium-program-item"><div class="premium-program-dot"></div><div class="premium-program-text"><strong>Logique premium :</strong> réserver ton prochain cours puis ajuster ton travail personnel selon ton évolution.</div></div>
+  `;
+}
+
+function openCalendly(url){
+  const modal = document.getElementById('calendly-modal');
+  const frame = document.getElementById('calendly-frame');
+  frame.src = (url && url.trim()) ? url.trim() : 'https://calendly.com/contact-selfshao/cours-adultes';
+  modal.classList.add('active');
+}
+
+function closeCalendly(){
+  const modal = document.getElementById('calendly-modal');
+  const frame = document.getElementById('calendly-frame');
+  modal.classList.remove('active');
+  frame.src = 'about:blank';
+}
+
+document.addEventListener('click', e => {
+  if(e.target && e.target.id === 'btn-open-calendly'){
+    openCalendly();
+  }
+  if(e.target && e.target.id === 'btn-scroll-program'){
+    const target = document.getElementById('premium-program-anchor');
+    if(target) target.scrollIntoView({behavior:'smooth', block:'start'});
+  }
+  if(e.target && e.target.id === 'btn-close-calendly'){
+    closeCalendly();
+  }
+  if(e.target && e.target.id === 'calendly-modal'){
+    closeCalendly();
+  }
+});
+
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape') closeCalendly();
+});
+
 // ADMIN
 async function showAdmin(){
   document.getElementById('screen-admin').classList.remove('hidden');
@@ -681,7 +839,7 @@ async function showAdmin(){
 }
 
 async function loadEleves(){
-  const { data } = await db.from('eleves').select('id,nom,identifiant,date_inscription').order('nom');
+  const { data } = await db.from('eleves').select('id,nom,identifiant,date_inscription,premium').order('nom');
   const eleves = data || [];
   const list = document.getElementById('admin-eleve-list');
   list.innerHTML = '';
@@ -693,7 +851,7 @@ async function loadEleves(){
     row.innerHTML = `
       <div>
         <div class="eleve-nom">${el.nom}</div>
-        <div class="eleve-id">@${el.identifiant}</div>
+        <div class="eleve-id">@${el.identifiant}</div><div style="margin-top:6px;">${el.premium ? '<span class="badge-premium">Premium</span>' : '<span class="badge-standard">Standard</span>'}</div>
       </div>
       <div style="display:flex;align-items:center;gap:16px;">
         <div class="eleve-cours-count">${count || 0} cours</div>
@@ -722,7 +880,7 @@ async function openEdit(id, nom){
   document.getElementById('save-msg').classList.add('hidden');
 
   const { data: prog } = await db.from('progression').select('*').eq('eleve_id', id).single();
-  const { data: eleve } = await db.from('eleves').select('commentaire,identifiant,mot_de_passe,email,titre,date_niveau,note_privee,referent_groupe').eq('id', id).single();
+  const { data: eleve } = await db.from('eleves').select('commentaire,identifiant,mot_de_passe,email,titre,date_niveau,note_privee,referent_groupe,premium').eq('id', id).single();
 
   const grid = document.getElementById('axes-edit-grid');
   grid.innerHTML = '';
@@ -772,6 +930,7 @@ async function openEdit(id, nom){
   document.getElementById('edit-date-niveau').value = (eleve && eleve.date_niveau) || '';
   document.getElementById('edit-note-privee').value = (eleve && eleve.note_privee) || '';
   document.getElementById('edit-referent').checked = (eleve && eleve.referent_groupe) || false;
+  document.getElementById('edit-premium').checked = (eleve && eleve.premium) || false;
   document.getElementById('sync-msg').textContent = '';
   document.getElementById('admin-edit').scrollIntoView({ behavior: 'smooth', block: 'start' });
   await loadEleves();
@@ -816,6 +975,7 @@ document.getElementById('btn-save-edit').addEventListener('click', async () => {
   updateData.date_niveau = dateNiveauVal || null;
   updateData.note_privee = notePriveeVal || null;
   updateData.referent_groupe = document.getElementById('edit-referent').checked;
+  updateData.premium = document.getElementById('edit-premium').checked;
   await db.from('eleves').update(updateData).eq('id', selectedEleveId);
 
   // Save bilan hebdo
@@ -1022,7 +1182,8 @@ document.addEventListener('click', e => {
 
 // MODAL
 document.getElementById('btn-new-eleve').addEventListener('click', () => {
-  ['new-nom','new-id','new-pw'].forEach(id => document.getElementById(id).value = '');
+  ['new-nom','new-id','new-pw','new-email'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('new-premium').checked = false;
   document.getElementById('modal-err').textContent = '';
   document.getElementById('modal-overlay').classList.remove('hidden');
 });
@@ -1040,7 +1201,8 @@ document.getElementById('btn-create-eleve').addEventListener('click', async () =
   const err = document.getElementById('modal-err');
   if(!nom || !id || !pw){ err.textContent = 'Tous les champs sont obligatoires.'; return; }
   const email = document.getElementById('new-email').value.trim();
-  const { error } = await db.from('eleves').insert({ nom, identifiant: id, mot_de_passe: pw, email: email || null, date_inscription: today() });
+  const premium = document.getElementById('new-premium').checked;
+  const { error } = await db.from('eleves').insert({ nom, identifiant: id, mot_de_passe: pw, email: email || null, premium, date_inscription: today() });
   if(error){ err.textContent = 'Identifiant déjà utilisé ou erreur.'; return; }
   document.getElementById('modal-overlay').classList.add('hidden');
   toast('Élève créé avec succès.');
